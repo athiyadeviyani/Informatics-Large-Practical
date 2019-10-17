@@ -2,6 +2,7 @@ package uk.ac.ed.inf.powergrab;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.Arrays;
 //import java.net.URL;
 //import com.mapbox.geojson.*;
 import java.util.List;
@@ -49,6 +50,41 @@ public class App
         System.out.println(features.get(1).properties().get("coins"));
         
         System.out.println(features.get(1).properties().get("power"));
+        
+        System.out.println(features.size()); // 50
+        
+        System.out.println(features.get(1).getNumberProperty("coins"));
+        
+        
+        double[][] importantFeatures = new double[50][4]; // store longitude, latitude, coins and power
+        
+        int n = features.size();
+        
+        for (int i = 0; i < n; i++) {
+        	
+        	Feature feature = features.get(i); 
+        	
+            List<Double> coordinates = ((Point) feature.geometry()).coordinates();
+            
+        	importantFeatures[i][0] = coordinates.get(0); // longitude
+        	importantFeatures[i][1] = coordinates.get(1); // latitude
+        	
+        	importantFeatures[i][2] = Double.parseDouble(feature.getStringProperty("coins"));
+        	importantFeatures[i][3] = Double.parseDouble(feature.getStringProperty("power"));
+        	
+        }
+        
+        // PRINT OUT 2D ARRAY
+        System.out.println(Arrays.deepToString(importantFeatures));
+        // TEST THE ARRAY
+//        for (int i = 0; i < n; i++) {
+//        	System.out.println(("-------------------"));
+//        	for (int j = 0; j < 4; j++) {
+//        		System.out.println(importantFeatures[i][j]);
+//        	}
+//        }
+//        
+        
         
         if (state.equals("stateless")) {
         	// do 
