@@ -46,6 +46,10 @@ public class App
         List<Double> coordinate = point1.coordinates();
         System.out.println(coordinate);
         
+        System.out.println(features.get(1).properties().get("coins"));
+        
+        System.out.println(features.get(1).properties().get("power"));
+        
         if (state.equals("stateless")) {
         	// do 
         	System.out.println("I am a stateless drone");
