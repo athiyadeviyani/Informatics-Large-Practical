@@ -91,10 +91,45 @@ public class App
         	Stateless stateless = new Stateless(startPos);
         	System.out.println(stateless.startPos.latitude);
         	System.out.println("I am a stateless drone");
+        	
+        	while (stateless.power > 0 && stateless.moves < 250) {
+        		double[] distances = new double[n];
+        	
+        		for (int i = 0; i < n; i++) {
+        			Feature feature = features.get(i); 
+                	
+                    List<Double> coordinates = ((Point) feature.geometry()).coordinates();
+                    Position pos = new Position(coordinates.get(0), coordinates.get(1));
+
+        			distances[i] = Position.distance(stateless.startPos, pos);
+//        			System.out.println(stateless.startPos.latitude);
+//        			System.out.println(pos.latitude);
+        		}
+        		
+        		System.out.println(Arrays.toString(distances));
+        		int closestStationIndex = Position.getMinIndex(distances);
+        		System.out.println(closestStationIndex);
+        		
+        		Feature closestStation = features.get(closestStationIndex);
+        		List<Double> closestStationCoordinates = ((Point) closestStation.geometry()).coordinates();
+        		Direction closestStationDirection = Position.getDirection(new Position(closestStationCoordinates.get(0), closestStationCoordinates.get(1)));
+        		System.out.println(closestStationDirection);
+        		
+        		stateless.move(closestStationDirection);
+        		stateless.coins += Double.parseDouble(closestStation.getStringProperty("coins"));
+        		stateless.startPos = new Position(closestStationCoordinates.get(0), closestStationCoordinates.get(1));
+        		
+        		System.out.println("DRONE DEETS");
+        		System.out.println(stateless.power);
+        		System.out.println(stateless.coins);
+        		System.out.println(stateless.moves);
+        	}
  
-        } else {
+        } else if (state.equals("stateful")){
         	// do something else
         	System.out.println("I am a stateful drone");
+        } else {
+        	System.out.println("ERROR: DRONE NOT FOUND.");
         }
     }
 }

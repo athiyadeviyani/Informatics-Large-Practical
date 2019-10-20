@@ -9,24 +9,17 @@ class Stateless extends Drone {
 	
 	// methods are -- move pos.nextdirection, minus power, add movecount
 	public void move(Direction direction) {
-		startPos = startPos.nextPosition(direction);
+		Position newPos = startPos.nextPosition(direction);
+		//startPos = startPos.nextPosition(direction);
+		System.out.println("THIS IS THE POSITION");
+		System.out.println(startPos.longitude);
+		System.out.println(newPos.longitude);
 		power -= 1.25;
 		moves++;  // max is 250
 	}
 	
 	
-	// calculate distance
-	public double distance(Position currentPos, Position newPos) {
-		double currentLatitude = currentPos.latitude;
-		double currentLongitude = currentPos.longitude;
-		
-		double newLatitude = currentPos.latitude;
-		double newLongitude = currentPos.longitude;
-		
-		double result = Math.sqrt(Math.pow((newLatitude-currentLatitude), 2) + Math.pow((newLongitude-currentLongitude), 2));
-		
-		return result;
-	}
+	
 	
 	// transfer()
 	// -- collect coins and power 
