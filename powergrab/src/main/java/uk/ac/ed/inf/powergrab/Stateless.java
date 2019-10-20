@@ -2,18 +2,30 @@ package uk.ac.ed.inf.powergrab;
 
 class Stateless extends Drone {
 	
-	public static Position pos;
 	
-	public Stateless(double coins, double power, int moves, Position pos) {
-		super(coins, power, moves);
-		this.pos = pos;
+	public Stateless(Position startPos) {
+		super(startPos);
 	}
 	
 	// methods are -- move pos.nextdirection, minus power, add movecount
-	public static void move(Direction direction) {
-		pos.nextPosition(direction);
-		power-= 1.25;
+	public void move(Direction direction) {
+		startPos = startPos.nextPosition(direction);
+		power -= 1.25;
 		moves++;  // max is 250
+	}
+	
+	
+	// calculate distance
+	public double distance(Position currentPos, Position newPos) {
+		double currentLatitude = currentPos.latitude;
+		double currentLongitude = currentPos.longitude;
+		
+		double newLatitude = currentPos.latitude;
+		double newLongitude = currentPos.longitude;
+		
+		double result = Math.sqrt(Math.pow((newLatitude-currentLatitude), 2) + Math.pow((newLongitude-currentLongitude), 2));
+		
+		return result;
 	}
 	
 	// transfer()

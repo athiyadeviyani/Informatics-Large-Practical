@@ -84,10 +84,12 @@ public class App
 //        	}
 //        }
 //        
-        
+        Position startPos = new Position(latitude, longitude);
         
         if (state.equals("stateless")) {
-        	// do 
+        	// do double coins, double power, int moves, Position pos
+        	Stateless stateless = new Stateless(startPos);
+        	System.out.println(stateless.startPos.latitude);
         	System.out.println("I am a stateless drone");
  
         } else {
