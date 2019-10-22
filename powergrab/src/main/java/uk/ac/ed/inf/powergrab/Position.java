@@ -44,14 +44,19 @@ public class Position {
 		double newLongitude = newPos.longitude;
 
 		double result = Math
-				.sqrt(Math.pow((newLatitude - currentLatitude), 2) + Math.pow((newLongitude - currentLongitude), 2));
+				.sqrt(Math.pow((newPos.latitude - currentPos.latitude), 2) + Math.pow((newPos.longitude - currentPos.longitude), 2));
 
 		return result;
 	}
 	
 	public static Direction getDirection(Position pos) {
-		double angle = Math.atan2(-pos.longitude, pos.latitude);
+		double angle = Math.toDegrees(Math.atan2(-pos.longitude, pos.latitude));
+		//System.out.println(angle);
 		double roundedAngle = Math.round((angle/22.5))*22.5;
+		//System.out.println(roundedAngle);
+		if (roundedAngle < 0.0) {
+			roundedAngle += 360.0;
+		}
 		int index = (int) (roundedAngle / 22.5);
 		return Direction.values()[index];
 	}
@@ -70,5 +75,10 @@ public class Position {
 	    	}
 	    }
 	    return index;
+	}
+	
+	public static Direction getRandomDirection() {
+		int index = App.rnd.nextInt(16);
+		return Direction.values()[index];
 	}
 }

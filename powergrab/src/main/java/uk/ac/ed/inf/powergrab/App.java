@@ -2,10 +2,12 @@ package uk.ac.ed.inf.powergrab;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 //import java.net.URL;
 //import com.mapbox.geojson.*;
 import java.util.List;
+import java.util.Random;
 
 import org.json.JSONException;
 
@@ -17,6 +19,31 @@ import com.mapbox.geojson.*;
  */
 public class App 
 {
+	public static java.util.Random rnd;
+	public static List<Station> stations = new ArrayList<Station>();
+	
+	public static FeatureCollection displayPath(List<Position> path, FeatureCollection featurecollection) {
+		// create a list of points
+		List<Point> points = new ArrayList<Point>();
+		// for every position, add that position as a point (fromlnglat) into new list
+		for (Position position : path) {
+			points.add(Point.fromLngLat(position.longitude, position.latitude));
+		}
+		// create a new linestring fromlnglat
+		LineString myLineString = LineString.fromLngLats(points);
+		// and then create a new feature from linestring *fromgeometry
+		Feature myFeature = Feature.fromGeometry(myLineString);
+		// list<f> fs = fc.features()
+		List<Feature> myFeatures = featurecollection.features();
+		// featureList.add(feature)
+		myFeatures.add(myFeature);
+		// featurecollection = fromfeatures(featurelist)
+		
+		
+		FeatureCollection finalPath = FeatureCollection.fromFeatures(myFeatures);
+		return finalPath;
+	}
+	
     public static void main( String[] args ) throws JSONException, IOException
     {
         // Read out the input arguments
@@ -29,6 +56,12 @@ public class App
         
         int seed = Integer.parseInt(args[5]);
         
+        //int seed = 6000;
+        
+        rnd = new Random(seed);
+        
+        System.out.println("THIS IS THE RANDOM SEED: " + rnd);
+        
         String state = args[6];
         
         String mapString = "http://homepages.inf.ed.ac.uk/stg/powergrab/" + year + "/" + month + "/" + day + "/powergrabmap.geojson";
@@ -38,98 +71,36 @@ public class App
         FeatureCollection collection = FeatureCollection.fromJson(mapJSON);
         List<Feature> features = collection.features();
         
-        //Stateless stateless = new Stateless();
-        
-        //Geometry featureGeo = features.get(1).coordinates();
-        
-        Point point1 = (Point) features.get(1).geometry();
-        
-        List<Double> coordinate = point1.coordinates();
-        System.out.println(coordinate);
-        
-        System.out.println(features.get(1).properties().get("coins"));
-        
-        System.out.println(features.get(1).properties().get("power"));
-        
-        System.out.println(features.size()); // 50
-        
-        System.out.println(features.get(1).getNumberProperty("coins"));
-        
-        
-        double[][] importantFeatures = new double[50][4]; // store longitude, latitude, coins and power
-        
-        int n = features.size();
-        
-        for (int i = 0; i < n; i++) {
-        	
-        	Feature feature = features.get(i); 
-        	
-            List<Double> coordinates = ((Point) feature.geometry()).coordinates();
-            
-        	importantFeatures[i][0] = coordinates.get(0); // longitude
-        	importantFeatures[i][1] = coordinates.get(1); // latitude
-        	
-        	importantFeatures[i][2] = Double.parseDouble(feature.getStringProperty("coins"));
-        	importantFeatures[i][3] = Double.parseDouble(feature.getStringProperty("power"));
-        	
+        for (Feature feature : features) {
+        	List<Double> coordinates = ((Point) feature.geometry()).coordinates();
+            Position position = new Position(coordinates.get(1), coordinates.get(0));
+            double coins = Double.parseDouble(feature.getStringProperty("coins"));
+            double power = Double.parseDouble(feature.getStringProperty("power"));
+        	Station station = new Station(coins, power, position);
+        	stations.add(station);
         }
         
-        // PRINT OUT 2D ARRAY
-        System.out.println(Arrays.deepToString(importantFeatures));
-        // TEST THE ARRAY
-//        for (int i = 0; i < n; i++) {
-//        	System.out.println(("-------------------"));
-//        	for (int j = 0; j < 4; j++) {
-//        		System.out.println(importantFeatures[i][j]);
-//        	}
-//        }
-//        
+        for (Station station : stations) {
+        	System.out.println("coins: " + station.coins);
+        	System.out.println("power: " + station.power);
+        	System.out.println("latitude: " + station.position.latitude);
+        	System.out.println("longitude: " + station.position.longitude);
+        	System.out.println("-----------------");
+        }
+        
+        
         Position startPos = new Position(latitude, longitude);
         
         if (state.equals("stateless")) {
-        	// do double coins, double power, int moves, Position pos
         	Stateless stateless = new Stateless(startPos);
-        	System.out.println(stateless.startPos.latitude);
-        	System.out.println("I am a stateless drone");
-        	
-        	while (stateless.power > 0 && stateless.moves < 250) {
-        		double[] distances = new double[n];
-        	
-        		for (int i = 0; i < n; i++) {
-        			Feature feature = features.get(i); 
-                	
-                    List<Double> coordinates = ((Point) feature.geometry()).coordinates();
-                    Position pos = new Position(coordinates.get(0), coordinates.get(1));
-
-        			distances[i] = Position.distance(stateless.startPos, pos);
-//        			System.out.println(stateless.startPos.latitude);
-//        			System.out.println(pos.latitude);
-        		}
-        		
-        		System.out.println(Arrays.toString(distances));
-        		int closestStationIndex = Position.getMinIndex(distances);
-        		System.out.println(closestStationIndex);
-        		
-        		Feature closestStation = features.get(closestStationIndex);
-        		List<Double> closestStationCoordinates = ((Point) closestStation.geometry()).coordinates();
-        		Direction closestStationDirection = Position.getDirection(new Position(closestStationCoordinates.get(0), closestStationCoordinates.get(1)));
-        		System.out.println(closestStationDirection);
-        		
-        		stateless.move(closestStationDirection);
-        		stateless.coins += Double.parseDouble(closestStation.getStringProperty("coins"));
-        		stateless.startPos = new Position(closestStationCoordinates.get(0), closestStationCoordinates.get(1));
-        		
-        		System.out.println("DRONE DEETS");
-        		System.out.println(stateless.power);
-        		System.out.println(stateless.coins);
-        		System.out.println(stateless.moves);
-        	}
- 
-        } else if (state.equals("stateful")){
-        	// do something else
-        	System.out.println("I am a stateful drone");
-        } else {
-        	System.out.println("ERROR: DRONE NOT FOUND.");
+        	List<Position> flightPath = stateless.playStateless();
+        	FeatureCollection finalFeatureCollection = displayPath(flightPath, collection);
+        	System.out.println(finalFeatureCollection.toJson());
+       	
+        } else if (state.equals("stateful")) {
+        	System.out.println("I am a stateful drone. Beep beep.");
         }
+        
+
     }
 }
