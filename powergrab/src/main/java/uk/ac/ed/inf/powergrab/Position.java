@@ -1,5 +1,7 @@
 package uk.ac.ed.inf.powergrab;
 
+import java.util.List;
+
 public class Position {
 	public double latitude;
 	public double longitude;
@@ -35,18 +37,18 @@ public class Position {
 		return latitude_check && longitude_check;
 	}
 
-	// calculate distance
-	public static double distance(Position currentPos, Position newPos) {
-		double currentLatitude = currentPos.latitude;
-		double currentLongitude = currentPos.longitude;
-
-		double newLatitude = newPos.latitude;
-		double newLongitude = newPos.longitude;
+	
+	public double distanceFromDrone(Position newPos) {
 
 		double result = Math
-				.sqrt(Math.pow((newPos.latitude - currentPos.latitude), 2) + Math.pow((newPos.longitude - currentPos.longitude), 2));
+				.sqrt(Math.pow((newPos.latitude - this.latitude), 2) 
+						+ Math.pow((newPos.longitude - this.longitude), 2));
 
 		return result;
+	}
+	
+	public boolean inRange(Position destination) {
+		return distanceFromDrone(destination) <= 0.00025;
 	}
 	
 	public static Direction getDirection(Position pos) {
@@ -77,8 +79,8 @@ public class Position {
 	    return index;
 	}
 	
-	public static Direction getRandomDirection() {
-		int index = App.rnd.nextInt(16);
+	public static Direction getRandomDirection(Direction[] directions) {
+		int index = App.rnd.nextInt(directions.length);
 		return Direction.values()[index];
 	}
 }
