@@ -7,11 +7,10 @@ public class Station {
 	public Position position;
 	public boolean visited;
 	
-	public Station(double coins, double power, Position position, boolean visited) {
+	public Station(double coins, double power, Position position) {
 		this.coins = coins;
 		this.power = power;
 		this.position = position;
-		this.visited = visited;
 	}
 	
 	public boolean negativeStation() {

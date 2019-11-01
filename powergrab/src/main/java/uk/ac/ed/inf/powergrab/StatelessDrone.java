@@ -23,7 +23,7 @@ class StatelessDrone extends Drone {
 
 	public Direction getBestDirection(Position currentPosition) {
 
-		HashMap<Direction, Double> DirectionCoins = new HashMap<Direction, Double>();
+		HashMap<Direction, Double> DirectionStation = new HashMap<Direction, Double>();
 
 		for (Direction direction : Direction.values()) {
 			Position nextPos = currentPosition.nextPosition(direction);
@@ -32,8 +32,20 @@ class StatelessDrone extends Drone {
 					// Look for all the stations that are within 0.00025 from nextPos
 					if (nextPos.distanceFromDrone(station.position) <= 0.00025 
 							&& station.position.inPlayArea() 
-							&& !station.visited ) {
-						DirectionCoins.put(direction, station.coins);
+							&& station.coins != 0.0
+							&& station.power != 0.0) {
+//						if (DirectionStation.get(direction) == null) {
+//							DirectionStation.put(direction, station);
+//						}
+//						else if (nextPos.distanceFromDrone(station.position) < nextPos.distanceFromDrone(DirectionStation.get(direction).position)) {
+//							DirectionStation.put(direction, station);
+//						}
+						if (DirectionStation.get(direction) != null) {
+							Double current = DirectionStation.get(direction);
+							DirectionStation.put(direction, current + station.coins);
+						} 
+						DirectionStation.put(direction, station.coins);
+						
 					}
 				}
 			}
@@ -44,11 +56,15 @@ class StatelessDrone extends Drone {
 		Direction bestDirection = Position.getRandomDirection(Direction.values());
 
 		// get the richest direction
-		for (Direction direction : DirectionCoins.keySet()) {
-			if (DirectionCoins.get(direction) > maxCoins) {
-				maxCoins = DirectionCoins.get(direction);
+		for (Direction direction : DirectionStation.keySet()) {
+			if (DirectionStation.get(direction) > maxCoins) {
+				maxCoins = DirectionStation.get(direction);
 				bestDirection = direction;
 			}
+		}
+		
+		if (DirectionStation.isEmpty()) {
+			System.out.println("DIRECTION STATION IS EMPTY");
 		}
 		return bestDirection;
 	}
@@ -72,7 +88,7 @@ class StatelessDrone extends Drone {
 
 		for (Station station : App.stations) {
 			if (startPos.distanceFromDrone(station.position) <= 0.00025 &&
-					!station.visited && station.position.inPlayArea()) {
+					station.coins != 0.0 && station.power != 0.0 && station.position.inPlayArea()) {
 				closestStations.add(station);
 			}
 		}
@@ -134,7 +150,6 @@ class StatelessDrone extends Drone {
 				if (closestStation == station) {
 					station.coins = 0.0;
 					station.power = 0.0;
-					station.visited = true;
 				}
 			}
 

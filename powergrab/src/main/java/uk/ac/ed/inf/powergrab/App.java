@@ -90,7 +90,7 @@ public class App
             Position position = new Position(coordinates.get(1), coordinates.get(0));
             double coins = Double.parseDouble(feature.getStringProperty("coins"));
             double power = Double.parseDouble(feature.getStringProperty("power"));
-        	Station station = new Station(coins, power, position, false);
+        	Station station = new Station(coins, power, position);
         	stations.add(station);
         }
         
