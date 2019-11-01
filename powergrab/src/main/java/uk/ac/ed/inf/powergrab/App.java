@@ -115,6 +115,11 @@ public class App
        	
         } else if (state.equals("stateful")) {
         	System.out.println("I am a stateful drone. Beep beep.");
+        	StatefulDrone stateful = new StatefulDrone(startPos);
+        	List<Position> flightPath = stateful.playStateful();
+        	FeatureCollection finalFeatureCollection = displayPath(flightPath, collection);
+        	System.out.println(finalFeatureCollection.toJson());
+        	writeToFile(fileName, finalFeatureCollection.toJson());
         }
         
 

@@ -60,6 +60,7 @@ public class Position {
 			roundedAngle += 360.0;
 		}
 		int index = (int) (roundedAngle / 22.5);
+		System.out.println(angle);
 		return Direction.values()[index];
 	}
 	
