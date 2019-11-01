@@ -54,6 +54,12 @@ class StatelessDrone extends Drone {
 		double maxCoins = 0.0;
 
 		Direction bestDirection = Position.getRandomDirection(Direction.values());
+		
+
+		while (DirectionStation.get(bestDirection) != null && DirectionStation.get(bestDirection) < 0.0) {
+			bestDirection = Position.getRandomDirection(Direction.values());
+		}
+
 
 		// get the richest direction
 		for (Direction direction : DirectionStation.keySet()) {
@@ -66,6 +72,9 @@ class StatelessDrone extends Drone {
 		if (DirectionStation.isEmpty()) {
 			System.out.println("DIRECTION STATION IS EMPTY");
 		}
+		
+		System.out.println("REACHABLE STATIONS: " + DirectionStation);
+		System.out.println("BEST DIRECTION: " + bestDirection);
 		return bestDirection;
 	}
 
@@ -111,7 +120,7 @@ class StatelessDrone extends Drone {
 			
 			// when nextPos is not inPlayArea
 			while (!nextPos.inPlayArea()) {
-				nextPos = startPos.nextPosition(Position.getRandomDirection(Direction.values()));
+				nextPos = startPos.nextPosition(getBestDirection(nextPos));
 				// nextPos = startPos.nextPosition(getBestDirection(startPos));
 			}
 			
