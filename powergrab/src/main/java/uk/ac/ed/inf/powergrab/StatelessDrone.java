@@ -151,6 +151,8 @@ class StatelessDrone extends Drone {
 			System.out.println("STATIONS IN RANGE");
 			// Charge from the closest station
 			Station closestStation = getClosestStation(startPos, closestStations);
+			
+			
 			coins += closestStation.coins;
 			power += Math.max(closestStation.power, -power);
 

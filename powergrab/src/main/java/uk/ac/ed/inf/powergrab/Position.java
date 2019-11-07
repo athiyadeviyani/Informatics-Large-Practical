@@ -52,7 +52,7 @@ public class Position {
 	}
 	
 	public static Direction getDirection(Position pos) {
-		double angle = Math.toDegrees(Math.atan2(-pos.longitude, pos.latitude));
+		double angle = Math.toDegrees(Math.atan2(pos.latitude, pos.longitude));
 		//System.out.println(angle);
 		double roundedAngle = Math.round((angle/22.5))*22.5;
 		//System.out.println(roundedAngle);
@@ -62,6 +62,74 @@ public class Position {
 		int index = (int) (roundedAngle / 22.5);
 		System.out.println(angle);
 		return Direction.values()[index];
+	}
+	
+	public static Direction getDirectionFromPosition(Position dronePosition, Position stationPosition) {
+		Double deltaY = stationPosition.latitude - dronePosition.latitude;
+		Double deltaX = stationPosition.longitude - dronePosition.longitude;
+		
+		Double theta = Math.atan2(deltaY, deltaX);
+		
+		// If station is on the left of the drone (stationPosition.longitude < dronePosition.longitude)
+		// Then add pi to theta
+		if (stationPosition.longitude < dronePosition.longitude) {
+			theta = theta + Math.PI;
+		}
+		
+		// Counter the negative values
+		theta = (theta + 2*Math.PI) % Math.PI;
+		theta = theta * 180/Math.PI;
+		
+		Double angle = Math.round((theta)*16/360.0) * 22.5;
+		
+		angle = ((angle-90.0)*(-1)+360.0) % 360.0;
+		
+		int index = (int) (angle / 22.5);
+		
+		System.out.println(angle);
+		
+		// Direction nextDirection = Direction.values()[index];
+		
+//		while (!dronePosition.nextPosition(nextDirection).inPlayArea()) {
+//			nextDirection = Direction.values()[(index + 1) % 16];
+//		}
+
+		return Direction.values()[index];
+	}
+	
+	
+	
+	public static int getDirectionIndexFromPosition(Position dronePosition, Position stationPosition) {
+		Double deltaY = stationPosition.latitude - dronePosition.latitude;
+		Double deltaX = stationPosition.longitude - dronePosition.longitude;
+		
+		Double theta = Math.atan2(deltaY, deltaX);
+		
+		// If station is on the left of the drone (stationPosition.longitude < dronePosition.longitude)
+		// Then add pi to theta
+		if (stationPosition.longitude < dronePosition.longitude) {
+			theta = theta + Math.PI;
+		}
+		
+		// Counter the negative values
+		theta = (theta + 2*Math.PI) % Math.PI;
+		theta = theta * 180/Math.PI;
+		
+		Double angle = Math.round((theta)*16/360.0) * 22.5;
+		
+		angle = ((angle-90.0)*(-1)+360.0) % 360.0;
+		
+		int index = (int) (angle / 22.5);
+		
+		System.out.println(angle);
+		
+//		Direction nextDirection = Direction.values()[index];
+		
+//		while (!dronePosition.nextPosition(nextDirection).inPlayArea()) {
+//			index = (index + 15) % 16;
+//		}
+
+		return index;
 	}
 	
 	public static int getMinIndex(double[] array){

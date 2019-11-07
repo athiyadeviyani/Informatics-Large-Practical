@@ -17,5 +17,15 @@ public class Station {
 		return coins < 0.0 || power < 0.0;
 	}
 	
+	public void printStationDetails() {
+		System.out.println("===========================");
+		System.out.println("STATION DETAILS");
+		System.out.println("COINS: " + coins);
+		System.out.println("POWER: " + power);
+		System.out.println("LONGITUDE: " + position.longitude);
+		System.out.println("LATITUDE: " + position.latitude);
+		System.out.println("===========================");
+	}
+	
 
 }

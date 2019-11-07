@@ -12,5 +12,7 @@ public class Drone {
 		this.startPos = startPos;
 	}
 	
+	
+	
 
 }
