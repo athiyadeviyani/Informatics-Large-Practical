@@ -147,9 +147,7 @@ class StatefulDrone extends Drone {
 		boolean flag = true;
 		
 		for (Position pos : flightPath) {
-			while ((nextPos.latitude == pos.latitude && nextPos.longitude == pos.longitude) || flag) {
-				// System.out.println("I AM REPEATING MYSELF");
-				// System.out.println(idx);
+			while ((nextPos.latitude == pos.latitude && nextPos.longitude == pos.longitude) || flag) { 
 				idx += 1;
 				
 				bestDirection = values.get(idx % 16);
@@ -248,6 +246,7 @@ class StatefulDrone extends Drone {
 				if (!closestStations.isEmpty()) {
 					// Absorb from the closest station
 					Station closestStation = getClosestStation(startPos, closestStations);
+					System.out.println("COINS IN STATION: " + closestStation.coins);
 					coins += closestStation.coins;
 					power += Math.max(closestStation.power, -power);
 
@@ -269,7 +268,6 @@ class StatefulDrone extends Drone {
 			}
 
 		}
-
 
 
 

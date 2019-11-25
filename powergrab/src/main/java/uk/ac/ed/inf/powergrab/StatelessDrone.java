@@ -21,6 +21,20 @@ class StatelessDrone extends Drone {
 		return moves < 250;
 	}
 
+	// Checks if a direction has red stations
+	public boolean noRedStations(Direction direction) {
+		boolean flag = true;
+		Position nextPos = startPos.nextPosition(direction);
+		List<Station> closestStationsNextPos = getClosestStations(nextPos);
+		if (!closestStationsNextPos.isEmpty()) {
+			Station closestStation = getClosestStation(nextPos, closestStationsNextPos);
+			if (closestStation.coins < 0.0) {
+				flag = false;
+			}
+		}
+		return flag;
+	}
+
 	public Direction getBestDirection(Position currentPosition) {
 
 		HashMap<Direction, Double> DirectionStation = new HashMap<Direction, Double>();
@@ -34,18 +48,13 @@ class StatelessDrone extends Drone {
 							&& station.position.inPlayArea() 
 							&& station.coins != 0.0
 							&& station.power != 0.0) {
-//						if (DirectionStation.get(direction) == null) {
-//							DirectionStation.put(direction, station);
-//						}
-//						else if (nextPos.distanceFromDrone(station.position) < nextPos.distanceFromDrone(DirectionStation.get(direction).position)) {
-//							DirectionStation.put(direction, station);
-//						}
+
 						if (DirectionStation.get(direction) != null) {
 							Double current = DirectionStation.get(direction);
 							DirectionStation.put(direction, current + station.coins);
 						} 
 						DirectionStation.put(direction, station.coins);
-						
+
 					}
 				}
 			}
@@ -54,11 +63,8 @@ class StatelessDrone extends Drone {
 		double maxCoins = 0.0;
 
 		Direction bestDirection = Position.getRandomDirection(Direction.values());
-		
 
-		while (DirectionStation.get(bestDirection) != null && DirectionStation.get(bestDirection) < 0.0) {
-			bestDirection = Position.getRandomDirection(Direction.values());
-		}
+		
 
 
 		// get the richest direction
@@ -69,10 +75,16 @@ class StatelessDrone extends Drone {
 			}
 		}
 		
+		while (DirectionStation.get(bestDirection) != null && 
+				!noRedStations(bestDirection)) {
+			bestDirection = Position.getRandomDirection(Direction.values());
+		}
+		
+		
 		if (DirectionStation.isEmpty()) {
 			System.out.println("DIRECTION STATION IS EMPTY");
 		}
-		
+
 		System.out.println("REACHABLE STATIONS: " + DirectionStation);
 		System.out.println("BEST DIRECTION: " + bestDirection);
 		return bestDirection;
@@ -90,13 +102,13 @@ class StatelessDrone extends Drone {
 
 		return closestStation;
 	}
-	
-	public List<Station> getClosestStations() {
+
+	public List<Station> getClosestStations(Position pos) {
 		// Charge from the closest station
 		List<Station> closestStations = new ArrayList<Station>();
 
 		for (Station station : App.stations) {
-			if (startPos.distanceFromDrone(station.position) <= 0.00025 &&
+			if (pos.distanceFromDrone(station.position) <= 0.00025 &&
 					station.coins != 0.0 && station.power != 0.0 && station.position.inPlayArea()) {
 				closestStations.add(station);
 			}
@@ -117,13 +129,13 @@ class StatelessDrone extends Drone {
 			// Find the best direction and move there
 			Direction bestDirection = getBestDirection(startPos);
 			Position nextPos = startPos.nextPosition(bestDirection);
-			
+
 			// when nextPos is not inPlayArea
 			while (!nextPos.inPlayArea()) {
 				nextPos = startPos.nextPosition(getBestDirection(nextPos));
 				// nextPos = startPos.nextPosition(getBestDirection(startPos));
 			}
-			
+
 			// update current position
 			startPos = nextPos;
 
@@ -135,8 +147,8 @@ class StatelessDrone extends Drone {
 			flightPath.add(startPos);
 
 			// Get the closest stations --> stations in range
-			List<Station> closestStations = getClosestStations();
-			
+			List<Station> closestStations = getClosestStations(startPos);
+
 			// No stations in range
 			if (closestStations.isEmpty()) {
 				System.out.println("NO STATIONS IN RANGE");
@@ -151,8 +163,8 @@ class StatelessDrone extends Drone {
 			System.out.println("STATIONS IN RANGE");
 			// Charge from the closest station
 			Station closestStation = getClosestStation(startPos, closestStations);
-			
-			
+
+
 			coins += closestStation.coins;
 			power += Math.max(closestStation.power, -power);
 
