@@ -72,36 +72,14 @@ class StatefulDrone extends Drone {
 	}
 
 
-
-
 	// =============================== CLOSEST STATIONS ===============================
 
-	// Get closest stations
-	public List<Station> getClosestStations(Position pos) {
-		// Charge from the closest station
-		List<Station> closestStations = new ArrayList<Station>();
 
+	public Station getClosestStation(Position curPos) {
+		Station closestStation = App.stations.get(0);
 		for (Station station : App.stations) {
-			if (pos.distanceFromDrone(station.position) <= 0.00025 &&
-					station.coins != 0.0 && station.power != 0.0 && station.position.inPlayArea()) {
-				closestStations.add(station);
-			}
-		}
-		return closestStations;
-	}
-
-
-	// Get closest station from a list of closest stations
-	public Station getClosestStation(Position curPos, List<Station> closestStations) {
-		// Initialise with the first station on the list
-
-		if (closestStations.isEmpty()) {
-			return null;
-		}
-		Station closestStation = closestStations.get(0);
-
-		for (Station station : closestStations) {
-			if (curPos.distanceFromDrone(station.position) < curPos.distanceFromDrone(closestStation.position)) {
+			if (curPos.distanceFromDrone(station.position) < 
+					curPos.distanceFromDrone(closestStation.position)) {
 				closestStation = station;
 			}
 		}
@@ -109,6 +87,12 @@ class StatefulDrone extends Drone {
 		return closestStation;
 	}
 
+	public boolean inRange(Position pos, Station station) {
+		if (pos.distanceFromDrone(station.position) <= 0.00025) {
+			return true;
+		}
+		return false;
+	}
 	// =============================== GET DIRECTION ===============================
 	// Sort Directions
 	public void sortedDirections(List<Direction> directions, final Station cPS) {
@@ -125,34 +109,36 @@ class StatefulDrone extends Drone {
 
 	public Direction getBestDirection(List<Position> flightPath, Station closestPositiveStation) {
 		
-		
+		//System.out.println("closestPositiveStation: " + closestPositiveStation);
+
+
 		List<Direction> values = Arrays.asList(Direction.values());
-		
+
 		sortedDirections(values, closestPositiveStation);
-		
-		
+
+
 		int idx = 0;
 		Direction bestDirection = values.get(idx);
 		Position nextPos = startPos.nextPosition(bestDirection);
-		
+
 		while (!nextPos.inPlayArea() || !noRedStations(bestDirection)) {
 
 			idx += 1;
-			
+
 			bestDirection = values.get(idx % 16);
 			nextPos = startPos.nextPosition(bestDirection);
-			
+
 		}
-		
+
 		boolean flag = true;
-		
+
 		for (Position pos : flightPath) {
 			while ((nextPos.latitude == pos.latitude && nextPos.longitude == pos.longitude) || flag) { 
 				idx += 1;
-				
+
 				bestDirection = values.get(idx % 16);
 				nextPos = startPos.nextPosition(bestDirection);
-				
+
 				if (nextPos.inPlayArea() && noRedStations(bestDirection)) {
 					flag = false;
 				} else {
@@ -161,14 +147,14 @@ class StatefulDrone extends Drone {
 
 			}
 		}
-		
-		
+
+
 
 		System.out.println("BEST DIRECTION IS " + bestDirection);
 		return bestDirection;
 	}
-	
-	
+
+
 
 
 	// =============================== RED STATION HANDLER ===============================
@@ -177,14 +163,28 @@ class StatefulDrone extends Drone {
 	public boolean noRedStations(Direction direction) {
 		boolean flag = true;
 		Position nextPos = startPos.nextPosition(direction);
-		List<Station> closestStationsNextPos = getClosestStations(nextPos);
-		if (!closestStationsNextPos.isEmpty()) {
-			Station closestStation = getClosestStation(nextPos, closestStationsNextPos);
-			if (closestStation.coins < 0.0) {
-				flag = false;
+
+		Station closestStation = getClosestStation(nextPos);
+
+		if (inRange(nextPos, closestStation) && (closestStation.coins < 0.0)) {
+			flag = false;
+		}
+
+		return flag;
+	}
+	
+	// =============================== COLLECT ===============================
+	public void collect(Station closestStation) {
+		coins += closestStation.coins;
+		power += Math.max(closestStation.power, -power);
+
+		// Update the station's coins and power
+		for (Station station : App.stations) {
+			if (closestStation == station) {
+				station.coins = 0.0;
+				station.power = 0.0;
 			}
 		}
-		return flag;
 	}
 
 
@@ -228,40 +228,34 @@ class StatefulDrone extends Drone {
 
 			Direction bestDirection = getBestDirection(flightPath, closestPositiveStation);
 			Position nextPos = startPos.nextPosition(bestDirection);
-			
+
 
 			// MOVE
 			startPos = nextPos;	
 			power -= 1.25;
 			moves += 1;
 			flightPath.add(startPos);
-			
+
+
+			Station closestStation = getClosestStation(startPos);
+
+
 
 			// Check if the closestPositiveStation is in range
-			if (startPos.distanceFromDrone(closestPositiveStation.position) <= 0.00025) {
+			if (inRange(startPos, closestStation) && closestStation == closestPositiveStation) {
 
 				// Collect from closest Station
-				List<Station> closestStations = getClosestStations(startPos);
+//				List<Station> closestStations = getClosestStations(startPos);
 
-				if (!closestStations.isEmpty()) {
-					// Absorb from the closest station
-					Station closestStation = getClosestStation(startPos, closestStations);
-					System.out.println("COINS IN STATION: " + closestStation.coins);
-					coins += closestStation.coins;
-					power += Math.max(closestStation.power, -power);
+				//				if (!closestStations.isEmpty()) {
+				// Absorb from the closest station
+				//					Station closestStation = getClosestStat(startPos);
+				System.out.println("COINS IN STATION: " + closestStation.coins);
+				collect(closestStation);
+				positiveStations.remove(closestPositiveStation);
 
-					// Update the station's coins and power
-					for (Station station : App.stations) {
-						if (closestStation == station) {
-							station.coins = 0.0;
-							station.power = 0.0;
-						}
-					}
+				//		}
 
-					positiveStations.remove(closestStation);
-
-				}
-				
 				printDroneDetails();
 			} else {
 				printDroneDetails();
