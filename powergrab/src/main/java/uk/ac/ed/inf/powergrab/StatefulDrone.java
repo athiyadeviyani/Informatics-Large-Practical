@@ -105,53 +105,76 @@ class StatefulDrone extends Drone {
 		}
 				);
 	}
+	
 
-
+	
+	public boolean isOnTheLeft(Position p1, Position p2) {
+		if (p1.longitude < p2.longitude) {
+			return true;
+		}
+		return false;
+	}
 	public Direction getBestDirection(List<Position> flightPath, Station closestPositiveStation) {
 		
 		//System.out.println("closestPositiveStation: " + closestPositiveStation);
 
 
 		List<Direction> values = Arrays.asList(Direction.values());
+		List<Direction> unsortedValues = Arrays.asList(Direction.values());
+		
+		
 
 		sortedDirections(values, closestPositiveStation);
 
 
 		int idx = 0;
 		Direction bestDirection = values.get(idx);
+		
+		
 		Position nextPos = startPos.nextPosition(bestDirection);
 
-		while (!nextPos.inPlayArea() || !noRedStations(bestDirection)) {
-
+	
+		
+		boolean flag = true;
+		
+		while ( !nextPos.inPlayArea() || !noRedStations(bestDirection)) {
 			idx += 1;
-
 			bestDirection = values.get(idx % 16);
 			nextPos = startPos.nextPosition(bestDirection);
-
 		}
-
-		boolean flag = true;
-
-		for (Position pos : flightPath) {
-			while ((nextPos.latitude == pos.latitude && nextPos.longitude == pos.longitude) || flag) { 
-				idx += 1;
-
-				bestDirection = values.get(idx % 16);
-				nextPos = startPos.nextPosition(bestDirection);
-
-				if (nextPos.inPlayArea() && noRedStations(bestDirection)) {
-					flag = false;
-				} else {
-					flag = true;
-				}
-
+		
+//		int dirIndex = 0;
+		
+		while (visited(nextPos, flightPath) || flag) {
+			idx += 1;
+			bestDirection = values.get(idx % 16);
+//			dirIndex += 1;
+//			bestDirection = Direction.values()[(dirIndex) % 16];
+			nextPos = startPos.nextPosition(bestDirection);
+			if (nextPos.inPlayArea() && noRedStations(bestDirection)) {
+				flag = false;
+			} else {
+//				idx += 1;
+//				bestDirection = values.get(idx % 16);
+//				nextPos = startPos.nextPosition(bestDirection);
+				flag = true;
 			}
 		}
 
 
-
 		System.out.println("BEST DIRECTION IS " + bestDirection);
 		return bestDirection;
+	}
+	
+	public boolean visited(Position curPos, List<Position> path) {
+		boolean visited = false;
+		for (Position pos : path) {
+			if (curPos.latitude == pos.latitude && curPos.longitude == pos.longitude) {
+				visited = true;
+			}
+		}
+		return visited;
+
 	}
 
 
@@ -219,16 +242,16 @@ class StatefulDrone extends Drone {
 			Station closestPositiveStation = getClosestPositiveStation(startPos, positiveStations);
 
 			// Find the direction that brings you closer to the closestPositiveStation
-
-			List<Direction> curDirs = new ArrayList<Direction>();
-			curDirs.addAll(Arrays.asList(Direction.values()));
-
 			System.out.println("================================== THIS IS MOVE NUMBER: " + moves + " ==================================");
 
 
 			Direction bestDirection = getBestDirection(flightPath, closestPositiveStation);
 			Position nextPos = startPos.nextPosition(bestDirection);
+			
+			
+			
 
+			
 
 			// MOVE
 			startPos = nextPos;	
@@ -238,23 +261,20 @@ class StatefulDrone extends Drone {
 
 
 			Station closestStation = getClosestStation(startPos);
-
-
-
+			
+			
+			
 			// Check if the closestPositiveStation is in range
 			if (inRange(startPos, closestStation) && closestStation == closestPositiveStation) {
-
-				// Collect from closest Station
-//				List<Station> closestStations = getClosestStations(startPos);
-
-				//				if (!closestStations.isEmpty()) {
-				// Absorb from the closest station
-				//					Station closestStation = getClosestStat(startPos);
+				
+				
 				System.out.println("COINS IN STATION: " + closestStation.coins);
+				
+				
 				collect(closestStation);
-				positiveStations.remove(closestPositiveStation);
+				
 
-				//		}
+				positiveStations.remove(closestPositiveStation);
 
 				printDroneDetails();
 			} else {

@@ -11,36 +11,73 @@ class StatelessDrone extends Drone {
 		super(startPos);
 	}
 
-	// check if drone still has power
+	// Check if the drone has power
 	public boolean hasPower() {
 		return power >= 1.25;
 	}
 
-	// check if drone still has moves
+	// Check if the drone still has moves
 	public boolean hasMoves() {
 		return moves < 250;
 	}
 
-	// Checks if a direction has red stations
-	public boolean noRedStations(Direction direction) {
-		boolean flag = true;
-		Position nextPos = startPos.nextPosition(direction);
-		List<Station> closestStationsNextPos = getClosestStations(nextPos);
-		if (!closestStationsNextPos.isEmpty()) {
-			Station closestStation = getClosestStation(nextPos, closestStationsNextPos);
-			if (closestStation.coins < 0.0) {
-				flag = false;
-			}
-		}
-		return flag;
+	// REMOVE 
+	public void printDroneDetails() {
+		System.out.println("--------------------------------------------------------------------------------");
+		System.out.println("DRONE DEETS");
+		System.out.println("POWER: " + power);
+		System.out.println("COINS: " + coins);
+		System.out.println("MOVES: " + moves);
+		System.out.println(" ");
 	}
 
-	public Direction getBestDirection(Position currentPosition) {
 
-		HashMap<Direction, Double> DirectionStation = new HashMap<Direction, Double>();
+	// Get the closest station
+	public Station getClosestStation(Position curPos) {
+		Station closestStation = App.stations.get(0);
+
+		for (Station station : App.stations) {
+			if (curPos.distanceFromDrone(closestStation.position) >
+			curPos.distanceFromDrone(station.position)) {
+				closestStation = station;
+			}
+		}
+
+		return closestStation;
+	}
+
+
+	// Check if a station is within range
+	public boolean inRange(Position curPos, Station station) {
+		if (curPos.distanceFromDrone(station.position) <= 0.00025) {
+			return true;
+		}
+		return false;
+	}
+
+
+	// Check if a direction leads you to a red station
+	public boolean noRedStations(Direction direction) {
+		Position nextPos = startPos.nextPosition(direction);
+		Station closestStation = getClosestStation(nextPos);
+
+		if (inRange(nextPos, closestStation) && closestStation.coins < 0.0) {
+			return false;
+		}
+
+		return true;
+	}
+
+
+	// Get the best direction
+	public Direction getBestDirection(Position curPos) {
+		Direction bestDirection = Position.getRandomDirection(Direction.values());
+
+		HashMap<Direction, Double> directionStation = new HashMap<Direction, Double>();
+		Position nextPos = curPos.nextPosition(bestDirection);
 
 		for (Direction direction : Direction.values()) {
-			Position nextPos = currentPosition.nextPosition(direction);
+			nextPos = curPos.nextPosition(direction);
 			if (nextPos.inPlayArea()) {
 				for (Station station : App.stations) {
 					// Look for all the stations that are within 0.00025 from nextPos
@@ -49,79 +86,63 @@ class StatelessDrone extends Drone {
 							&& station.coins != 0.0
 							&& station.power != 0.0) {
 
-						if (DirectionStation.get(direction) != null) {
-							Double current = DirectionStation.get(direction);
-							DirectionStation.put(direction, current + station.coins);
+						if (directionStation.get(direction) != null) {
+							Double current = directionStation.get(direction);
+							directionStation.put(direction, current + station.coins);
 						} 
-						DirectionStation.put(direction, station.coins);
+						directionStation.put(direction, station.coins);
 
 					}
 				}
 			}
 		}
 
+
 		double maxCoins = 0.0;
 
-		Direction bestDirection = Position.getRandomDirection(Direction.values());
-
-		
-
-
-		// get the richest direction
-		for (Direction direction : DirectionStation.keySet()) {
-			if (DirectionStation.get(direction) > maxCoins) {
-				maxCoins = DirectionStation.get(direction);
+		for (Direction direction : directionStation.keySet()) {
+			if (directionStation.get(direction) > maxCoins) {
+				maxCoins = directionStation.get(direction);
 				bestDirection = direction;
 			}
 		}
 		
-		while (DirectionStation.get(bestDirection) != null && 
-				!noRedStations(bestDirection)) {
+		nextPos = curPos.nextPosition(bestDirection);
+//		int dirIndex = bestDirection.ordinal();
+		// If there are all red stations or exceed boundary, move clockwise until safe
+		while(!noRedStations(bestDirection) || !nextPos.inPlayArea()) {
+//			dirIndex += 1;
+//			bestDirection = Direction.values()[(dirIndex) % 16];
 			bestDirection = Position.getRandomDirection(Direction.values());
-		}
-		
-		
-		if (DirectionStation.isEmpty()) {
-			System.out.println("DIRECTION STATION IS EMPTY");
+			nextPos = curPos.nextPosition(bestDirection);
 		}
 
-		System.out.println("REACHABLE STATIONS: " + DirectionStation);
-		System.out.println("BEST DIRECTION: " + bestDirection);
+
 		return bestDirection;
 	}
 
-	public Station getClosestStation(Position curPos, List<Station> closestStations) {
-		// Initialise with the first station on the list
-		Station closestStation = closestStations.get(0);
+	// Collect coins
+	public void collect(Station closestStation) {
+		coins += closestStation.coins;
+		power += Math.max(closestStation.power, -power);
 
-		for (Station station : closestStations) {
-			if (curPos.distanceFromDrone(station.position) < curPos.distanceFromDrone(closestStation.position)) {
-				closestStation = station;
-			}
-		}
-
-		return closestStation;
-	}
-
-	public List<Station> getClosestStations(Position pos) {
-		// Charge from the closest station
-		List<Station> closestStations = new ArrayList<Station>();
-
+		// Update the station's coins and power
 		for (Station station : App.stations) {
-			if (pos.distanceFromDrone(station.position) <= 0.00025 &&
-					station.coins != 0.0 && station.power != 0.0 && station.position.inPlayArea()) {
-				closestStations.add(station);
+			if (closestStation == station) {
+				station.coins = 0.0;
+				station.power = 0.0;
 			}
 		}
-		return closestStations;
 	}
 
+
+	// Make drone move
 	public List<Position> playStateless() {
 
 		// Initialise the flightPath 
 		List<Position> flightPath = new ArrayList<Position>();
 
-		// Add the starting position to flightPath
+		// Add the starting position to the flightPath
 		flightPath.add(startPos);
 
 		while (hasPower() && hasMoves()) {
@@ -130,63 +151,31 @@ class StatelessDrone extends Drone {
 			Direction bestDirection = getBestDirection(startPos);
 			Position nextPos = startPos.nextPosition(bestDirection);
 
-			// when nextPos is not inPlayArea
-			while (!nextPos.inPlayArea()) {
-				nextPos = startPos.nextPosition(getBestDirection(nextPos));
-				// nextPos = startPos.nextPosition(getBestDirection(startPos));
-			}
 
-			// update current position
+			// Move
 			startPos = nextPos;
-
-			// Update power and moves
 			moves += 1;
 			power -= 1.25;
 
-			// Add the flight  path
+			// Add the flight path
 			flightPath.add(startPos);
 
-			// Get the closest stations --> stations in range
-			List<Station> closestStations = getClosestStations(startPos);
+			// Get the closest station
+			Station closestStation = getClosestStation(startPos);
 
-			// No stations in range
-			if (closestStations.isEmpty()) {
-				System.out.println("NO STATIONS IN RANGE");
-				System.out.println("DRONE DEETS");
-				System.out.println("POWER: " + power);
-				System.out.println("COINS: " + coins);
-				System.out.println("MOVES: " + moves);
-				System.out.println("===========================");
-				continue;  // goes back to the top of the while loop				
-			} 
-
-			System.out.println("STATIONS IN RANGE");
-			// Charge from the closest station
-			Station closestStation = getClosestStation(startPos, closestStations);
-
-
-			coins += closestStation.coins;
-			power += Math.max(closestStation.power, -power);
-
-			// Update the station details from the global list
-			for (Station station : App.stations) {
-				if (closestStation == station) {
-					station.coins = 0.0;
-					station.power = 0.0;
-				}
+			if (inRange(startPos, closestStation)) {
+				collect(closestStation);
+				printDroneDetails();
+			} else {
+				printDroneDetails();
 			}
-
-
-			System.out.println("DRONE DEETS");
-			System.out.println("POWER: " + power);
-			System.out.println("COINS: " + coins);
-			System.out.println("MOVES: " + moves);
-			System.out.println("===========================");
-
 
 		}
 
+
 		return flightPath;
 	}
+
+
 
 }
