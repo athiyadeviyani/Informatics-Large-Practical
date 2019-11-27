@@ -9,9 +9,6 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.mapbox.geojson.*;
 
 public class JsonParser {
 	

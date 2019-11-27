@@ -38,116 +38,57 @@ public class Position {
 	}
 
 	
+	// Calculates the distance of a station from the drone
 	public double distanceFromDrone(Position newPos) {
 
-		double result = Math
-				.sqrt(Math.pow((newPos.latitude - this.latitude), 2) 
-						+ Math.pow((newPos.longitude - this.longitude), 2));
+		double result = Math.sqrt(
+				Math.pow((newPos.latitude - this.latitude), 2) + Math.pow((newPos.longitude - this.longitude), 2));
 
 		return result;
 	}
-	
-	public boolean inRange(Position destination) {
-		return distanceFromDrone(destination) <= 0.00025;
-	}
-	
-	public static Direction getDirection(Position pos) {
-		double angle = Math.toDegrees(Math.atan2(pos.latitude, pos.longitude));
-		//System.out.println(angle);
-		double roundedAngle = Math.round((angle/22.5))*22.5;
-		//System.out.println(roundedAngle);
-		if (roundedAngle < 0.0) {
-			roundedAngle += 360.0;
-		}
-		int index = (int) (roundedAngle / 22.5);
-		System.out.println(angle);
-		return Direction.values()[index];
-	}
-	
-	public static Direction getDirectionFromPosition(Position dronePosition, Position stationPosition) {
-		Double deltaY = stationPosition.latitude - dronePosition.latitude;
-		Double deltaX = stationPosition.longitude - dronePosition.longitude;
-		
-		Double theta = Math.atan2(deltaY, deltaX);
-		
-		// If station is on the left of the drone (stationPosition.longitude < dronePosition.longitude)
-		// Then add pi to theta
-		if (stationPosition.longitude < dronePosition.longitude) {
-			theta = theta + Math.PI;
-		}
-		
-		// Counter the negative values
-		theta = (theta + 2*Math.PI) % Math.PI;
-		theta = theta * 180/Math.PI;
-		
-		Double angle = Math.round((theta)*16/360.0) * 22.5;
-		
-		angle = ((angle-90.0)*(-1)+360.0) % 360.0;
-		
-		int index = (int) (angle / 22.5);
-		
-		System.out.println(angle);
-		
-		// Direction nextDirection = Direction.values()[index];
-		
-//		while (!dronePosition.nextPosition(nextDirection).inPlayArea()) {
-//			nextDirection = Direction.values()[(index + 1) % 16];
-//		}
 
-		return Direction.values()[index];
-	}
 	
-	
-	
-	public static int getDirectionIndexFromPosition(Position dronePosition, Position stationPosition) {
-		Double deltaY = stationPosition.latitude - dronePosition.latitude;
-		Double deltaX = stationPosition.longitude - dronePosition.longitude;
-		
-		Double theta = Math.atan2(deltaY, deltaX);
-		
-		// If station is on the left of the drone (stationPosition.longitude < dronePosition.longitude)
-		// Then add pi to theta
-		if (stationPosition.longitude < dronePosition.longitude) {
-			theta = theta + Math.PI;
+	// Gets the closest station from current position
+	public Station getClosestStation() {
+		Position curPos = new Position(this.latitude, this.longitude);
+		Station closestStation = App.stations.get(0);
+		for (Station station : App.stations) {
+			if (curPos.distanceFromDrone(station.position) < curPos.distanceFromDrone(closestStation.position)) {
+				closestStation = station;
+			}
 		}
-		
-		// Counter the negative values
-		theta = (theta + 2*Math.PI) % Math.PI;
-		theta = theta * 180/Math.PI;
-		
-		Double angle = Math.round((theta)*16/360.0) * 22.5;
-		
-		angle = ((angle-90.0)*(-1)+360.0) % 360.0;
-		
-		int index = (int) (angle / 22.5);
-		
-		System.out.println(angle);
-		
-//		Direction nextDirection = Direction.values()[index];
-		
-//		while (!dronePosition.nextPosition(nextDirection).inPlayArea()) {
-//			index = (index + 15) % 16;
-//		}
 
-		return index;
+		return closestStation;
 	}
-	
-	public static int getMinIndex(double[] array){
 
-	    int n = array.length;
-	    
-	    double min = array[0];
-	    int index = 0;
-	    
-	    for (int i = 0; i < n; i++) {
-	    	if (array[i] < min) {
-	    		min = array[i];
-	    		index = i;
-	    	}
-	    }
-	    return index;
-	}
 	
+	// Checks whether or not a station is within charging range of the drone
+	public boolean inRange(Station station) {
+		Position pos = new Position(this.latitude, this.longitude);
+		if (pos.distanceFromDrone(station.position) <= 0.00025) {
+			return true;
+		}
+		return false;
+	}
+
+	
+	// Checks whether moving to a certain position makes you charge from a negative station
+	public boolean noRedStations() {
+		Position pos = new Position(this.latitude, this.longitude);
+
+		boolean noRedStations = true;
+
+		Station closestStation = pos.getClosestStation();
+
+		if (pos.inRange(closestStation) && (closestStation.coins < 0.0)) {
+			noRedStations = false;
+		}
+
+		return noRedStations;
+	}
+
+	
+	// Gets a random direction (based on the seed input)
 	public static Direction getRandomDirection(Direction[] directions) {
 		int index = App.rnd.nextInt(directions.length);
 		return Direction.values()[index];
