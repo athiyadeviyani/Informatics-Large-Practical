@@ -3,9 +3,7 @@ package uk.ac.ed.inf.powergrab;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 //import java.net.URL;
 //import com.mapbox.geojson.*;
 import java.util.List;
@@ -22,6 +20,7 @@ import com.mapbox.geojson.*;
 public class App 
 {
 	public static java.util.Random rnd;
+	public static java.util.Random statefulRandom = new Random(6000);
 	public static List<Station> stations = new ArrayList<Station>();
 
 	public static void writeToFile(String fileName, String str) 

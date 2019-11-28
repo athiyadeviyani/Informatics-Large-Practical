@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 
 class StatefulDrone extends Drone {
@@ -65,15 +64,18 @@ class StatefulDrone extends Drone {
 	public Direction getBestDirection(List<Position> flightPath, Station closestPositiveStation) {
 
 		List<Direction> values = Arrays.asList(Direction.values());
+		List<Direction> unsortedValues = Arrays.asList(Direction.values());
+		
+		
 
 		sortedDirections(values, closestPositiveStation);
 
 		int idx = 0;
 		Direction bestDirection = values.get(idx);
+		
 
 		Position nextPos = startPos.nextPosition(bestDirection);
 
-		boolean flag = true;
 
 		while (!nextPos.inPlayArea() || !nextPos.noRedStations()) {
 			idx += 1;
@@ -81,15 +83,16 @@ class StatefulDrone extends Drone {
 			nextPos = startPos.nextPosition(bestDirection);
 		}
 
-		while (visited(nextPos, flightPath) || flag) {
-			idx += 1;
-			bestDirection = values.get(idx % 16);
+		if (visited(nextPos, flightPath)) {
+
+			bestDirection = Position.getRandomDirectionStateful(Direction.values());
 
 			nextPos = startPos.nextPosition(bestDirection);
-			if (nextPos.inPlayArea() && nextPos.noRedStations()) {
-				flag = false;
-			} else {
-				flag = true;
+			
+			while (!nextPos.inPlayArea() || !nextPos.noRedStations()) {
+				idx += 1;
+				bestDirection = values.get(idx % 16);
+				nextPos = startPos.nextPosition(bestDirection);
 			}
 		}
 
@@ -98,13 +101,15 @@ class StatefulDrone extends Drone {
 	}
 
 	public boolean visited(Position curPos, List<Position> path) {
-		boolean visited = false;
+
+		int count = 0;
 		for (Position pos : path) {
 			if (curPos.latitude == pos.latitude && curPos.longitude == pos.longitude) {
-				visited = true;
+
+				count += 1;
 			}
 		}
-		return visited;
+		return count > 1;
 
 	}
 

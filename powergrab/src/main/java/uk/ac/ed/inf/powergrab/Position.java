@@ -1,6 +1,5 @@
 package uk.ac.ed.inf.powergrab;
 
-import java.util.List;
 
 public class Position {
 	public double latitude;
@@ -40,7 +39,6 @@ public class Position {
 	
 	// Calculates the distance of a station from the drone
 	public double distanceFromDrone(Position newPos) {
-
 		double result = Math.sqrt(
 				Math.pow((newPos.latitude - this.latitude), 2) + Math.pow((newPos.longitude - this.longitude), 2));
 
@@ -91,6 +89,12 @@ public class Position {
 	// Gets a random direction (based on the seed input)
 	public static Direction getRandomDirection(Direction[] directions) {
 		int index = App.rnd.nextInt(directions.length);
+		return Direction.values()[index];
+	}
+	
+	public static Direction getRandomDirectionStateful(Direction[] directions) {
+	
+		int index = App.statefulRandom.nextInt(directions.length);
 		return Direction.values()[index];
 	}
 }
