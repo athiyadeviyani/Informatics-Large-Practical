@@ -89,12 +89,7 @@ public class Position {
 	// Gets a random direction (based on the seed input)
 	public static Direction getRandomDirection(Direction[] directions) {
 		int index = App.rnd.nextInt(directions.length);
-		return Direction.values()[index];
+		return directions[index];
 	}
 	
-	public static Direction getRandomDirectionStateful(Direction[] directions) {
-	
-		int index = App.statefulRandom.nextInt(directions.length);
-		return Direction.values()[index];
-	}
 }

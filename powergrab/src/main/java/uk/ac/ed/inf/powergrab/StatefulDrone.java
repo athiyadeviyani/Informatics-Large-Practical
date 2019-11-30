@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 
 class StatefulDrone extends Drone {
@@ -60,44 +61,102 @@ class StatefulDrone extends Drone {
 			}
 		});
 	}
+	
+	
+	
+	public Direction getBestRandomDirection(Position pos) {
+		HashMap<Direction, Double> directionCoins = new HashMap<Direction, Double>();
+		for (Direction direction : Direction.values()) {
+			Position nextPos = pos.nextPosition(direction);
+			Station closestStation = nextPos.getClosestStation();
+			if (nextPos.inRange(closestStation) && nextPos.inPlayArea()) {
+				directionCoins.put(direction, closestStation.coins);
+			}	
+		}
+		
+		Direction bestRandomDirection = Position.getRandomDirection(Direction.values());
+		Position nextPos = pos.nextPosition(bestRandomDirection);
+		
+		
+		Station closestStation = nextPos.getClosestStation();
+		
+		for (Direction direction : directionCoins.keySet()) {
+			if (directionCoins.get(direction) > closestStation.coins) {
+				bestRandomDirection = direction;
+				nextPos = pos.nextPosition(bestRandomDirection);
+				closestStation = nextPos.getClosestStation();
+			}
+		}
+		
+		// change or no red stations in case bad spawn
+		List<Direction> values = new ArrayList<Direction>(Arrays.asList(Direction.values()));
+		//int i = 0;
+		
+		for (int i = 0; i < values.size(); i++) {
+			if (nextPos.inPlayArea() && nextPos.noRedStations()) {
+				break;
+			}
+			// 'Run away' from the closestStation as it leads to the boundary
+			// or to a red station
+			sortedDirections(values, closestStation);
+			bestRandomDirection = values.get(values.size() - i - 1);
+			nextPos = pos.nextPosition(bestRandomDirection);
+		}
+		
+		return bestRandomDirection;
+		
+	}
 
 	public Direction getBestDirection(List<Position> flightPath, Station closestPositiveStation) {
 
-		List<Direction> values = Arrays.asList(Direction.values());
-		List<Direction> unsortedValues = Arrays.asList(Direction.values());
+		List<Direction> values = new ArrayList<Direction>(Arrays.asList(Direction.values()));
+
 		
 		
-
-		sortedDirections(values, closestPositiveStation);
-
-		int idx = 0;
-		Direction bestDirection = values.get(idx);
+		List<Direction> goodDirections = new ArrayList<Direction>();
 		
-
-		Position nextPos = startPos.nextPosition(bestDirection);
-
-
-		while (!nextPos.inPlayArea() || !nextPos.noRedStations()) {
-			idx += 1;
-			bestDirection = values.get(idx % 16);
-			nextPos = startPos.nextPosition(bestDirection);
-		}
-
-		if (visited(nextPos, flightPath)) {
-
-			bestDirection = Position.getRandomDirectionStateful(Direction.values());
-
-			nextPos = startPos.nextPosition(bestDirection);
-			
-			while (!nextPos.inPlayArea() || !nextPos.noRedStations()) {
-				idx += 1;
-				bestDirection = values.get(idx % 16);
-				nextPos = startPos.nextPosition(bestDirection);
+		for (Direction direction : values) {
+			Position nextPos = startPos.nextPosition(direction);
+			if (nextPos.noRedStations() && nextPos.inPlayArea()) {
+				goodDirections.add(direction);
 			}
 		}
+		
+		if (goodDirections.isEmpty()) {
+			return getBestRandomDirection(startPos);
+		}
+		
+		sortedDirections(goodDirections, closestPositiveStation);
+		
+		int idx = 0;
+		Direction bestDirection = goodDirections.get(idx);
 
+		System.out.println(goodDirections);
+		Position nextPos = startPos.nextPosition(bestDirection);
+		
+
+		
+		Direction[] goodDirArray = new Direction[goodDirections.size()];
+        goodDirArray = goodDirections.toArray(goodDirArray);
+
+
+	
+		if (visited(nextPos, flightPath)) {
+			return null;
+		}
+		
+		System.out.println("COINS IN NEXT STATION: " + nextPos.getClosestStation().coins);
+		System.out.println(goodDirArray);
 		System.out.println("BEST DIRECTION IS " + bestDirection);
 		return bestDirection;
+	}
+	
+	public Station changeStations(Station currentStation, List<Station> positiveStations) {
+		positiveStations.remove(currentStation);
+		Station nextPositiveStation = positiveStations.get(0);
+		positiveStations.add(currentStation);
+		
+		return nextPositiveStation;
 	}
 
 	public boolean visited(Position curPos, List<Position> path) {
@@ -127,19 +186,40 @@ class StatefulDrone extends Drone {
 
 		// Get positive stations
 		List<Station> positiveStations = getPositiveStations();
+		List<Station> visitedStations = new ArrayList<Station>();
 
 		// CONTROL VARIABLES
 		// Check how many coins are in the map -- goal is to collect all
 		double maxCoins = getMaxCoins(positiveStations);
 
 		// WHILE LOOP TO MOVE DRONE
+		
+		boolean reached = false;
+		Station closestPositiveStation = getClosestPositiveStation(startPos, positiveStations);
 
 		while (hasPower() && hasMoves() && positiveStations.size() > 0) {
 
 			// Move drone to the closest positive station
-			Station closestPositiveStation = getClosestPositiveStation(startPos, positiveStations);
-
+			
+			if (reached) {
+				closestPositiveStation = getClosestPositiveStation(startPos, positiveStations);
+			}
+			
+			
 			Direction bestDirection = getBestDirection(flightPath, closestPositiveStation);
+			if (bestDirection == null && positiveStations.size() > 1) {
+
+				closestPositiveStation = changeStations(closestPositiveStation, positiveStations);
+				bestDirection = getBestDirection(flightPath, closestPositiveStation);
+				if (bestDirection == null) {
+					bestDirection = getBestRandomDirection(startPos);
+				}
+
+			} else if (bestDirection == null && positiveStations.size() <= 1) {
+				bestDirection = getBestRandomDirection(startPos);
+			}
+			
+			System.out.println(positiveStations.size());
 			Position nextPos = startPos.nextPosition(bestDirection);
 
 			result += startPos.latitude + ",";
@@ -157,17 +237,22 @@ class StatefulDrone extends Drone {
 			Station closestStation = startPos.getClosestStation();
 
 			// Check if the closestPositiveStation is in range
-			if (startPos.inRange(closestStation) && closestStation == closestPositiveStation) {
+			if (startPos.inRange(closestStation)) {
 
 				System.out.println("COINS IN STATION: " + closestStation.coins);
 
 				collect(closestStation);
-
-				positiveStations.remove(closestPositiveStation);
+				visitedStations.add(closestStation);
+				
+				if (closestStation == closestPositiveStation) {
+					positiveStations.remove(closestStation);
+				}
+				reached = true;
 				result += coins + ",";
 				result += power + "\n";
-				printDroneDetails();
+				printDroneDetails();  
 			} else {
+				reached = false;
 				result += coins + ",";
 				result += power + "\n";
 				printDroneDetails();

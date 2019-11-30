@@ -5,7 +5,6 @@ public class Station {
 	public double coins;
 	public double power;
 	public Position position;
-	public boolean visited;
 	
 	public Station(double coins, double power, Position position) {
 		this.coins = coins;

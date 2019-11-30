@@ -20,7 +20,7 @@ import com.mapbox.geojson.*;
 public class App 
 {
 	public static java.util.Random rnd;
-	public static java.util.Random statefulRandom = new Random(6000);
+	public static java.util.Random statefulRandom = new Random(5932);
 	public static List<Station> stations = new ArrayList<Station>();
 
 	public static void writeToFile(String fileName, String str) 
