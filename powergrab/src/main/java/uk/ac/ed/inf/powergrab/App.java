@@ -20,32 +20,8 @@ import com.mapbox.geojson.*;
 public class App 
 {
 	public static java.util.Random rnd;
-	public static java.util.Random statefulRandom = new Random(5932);
 	public static List<Station> stations = new ArrayList<Station>();
 
-	public static void writeToFile(String fileName, String str) 
-			throws IOException {
-		BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
-		writer.write(str);
-
-		writer.close();
-	}
-
-	
-	// Outputs a list of positions (flight path of the drone) as a FeatureCollection object
-	public static FeatureCollection displayPath(List<Position> path, FeatureCollection featurecollection) {
-
-		List<Point> points = new ArrayList<Point>();
-		for (Position position : path) {
-			points.add(Point.fromLngLat(position.longitude, position.latitude));
-		}
-		LineString myLineString = LineString.fromLngLats(points);
-		Feature myFeature = Feature.fromGeometry(myLineString);
-		List<Feature> myFeatures = featurecollection.features();
-		myFeatures.add(myFeature);
-		FeatureCollection finalPath = FeatureCollection.fromFeatures(myFeatures);
-		return finalPath;
-	}
 
 	public static void main( String[] args ) throws JSONException, IOException
 	{
@@ -94,17 +70,17 @@ public class App
 			System.out.println("I am a stateless drone. Beep beep.");
 			StatelessDrone stateless = new StatelessDrone(startPos);
 			List<Position> flightPath = stateless.playStateless(fileNameTxt);
-			FeatureCollection finalFeatureCollection = displayPath(flightPath, collection);
+			FeatureCollection finalFeatureCollection = Output.displayPath(flightPath, collection);
 			System.out.println(finalFeatureCollection.toJson());
-			writeToFile(fileNameGeoJson, finalFeatureCollection.toJson());
+			Output.writeToFile(fileNameGeoJson, finalFeatureCollection.toJson());
 
 		} else if (state.equals("stateful")) {
 			System.out.println("I am a stateful drone. Beep beep.");
 			StatefulDrone stateful = new StatefulDrone(startPos);
 			List<Position> flightPath = stateful.playStateful(fileNameTxt);
-			FeatureCollection finalFeatureCollection = displayPath(flightPath, collection);
+			FeatureCollection finalFeatureCollection = Output.displayPath(flightPath, collection);
 			System.out.println(finalFeatureCollection.toJson());
-			writeToFile(fileNameGeoJson, finalFeatureCollection.toJson());
+			Output.writeToFile(fileNameGeoJson, finalFeatureCollection.toJson());
 		}
 
 

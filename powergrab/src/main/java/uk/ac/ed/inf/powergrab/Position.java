@@ -1,5 +1,6 @@
 package uk.ac.ed.inf.powergrab;
 
+import java.util.HashMap;
 
 public class Position {
 	public double latitude;
@@ -85,6 +86,38 @@ public class Position {
 		return noRedStations;
 	}
 
+	public Direction getHighestUtilityDirection() {
+		Position pos = new Position(this.latitude, this.longitude);
+		Direction highestUtilityDirection = Position.getRandomDirection(Direction.values());
+		Position nextPos = pos.nextPosition(highestUtilityDirection);
+		Station closestStation = nextPos.getClosestStation();
+		
+		HashMap<Direction, Double> directionCoins = new HashMap<Direction, Double>();
+		
+		
+		for (Direction direction : Direction.values()) {
+			Position newPos = pos.nextPosition(direction);
+			Station newClosestStation = newPos.getClosestStation();
+			if (newPos.inRange(newClosestStation) && newPos.inPlayArea()) {
+				if (directionCoins.get(direction) != null) {
+					Double current = directionCoins.get(direction);
+					directionCoins.put(direction, current + newClosestStation.coins);
+				}
+				directionCoins.put(direction, newClosestStation.coins);
+			}
+		}
+		
+		for (Direction direction : directionCoins.keySet()) {
+			if (directionCoins.get(direction) > closestStation.coins) {
+				highestUtilityDirection = direction;
+				nextPos = pos.nextPosition(highestUtilityDirection);
+				closestStation = nextPos.getClosestStation();
+			}
+		}
+		
+		return highestUtilityDirection;		
+		
+	}
 	
 	// Gets a random direction (based on the seed input)
 	public static Direction getRandomDirection(Direction[] directions) {

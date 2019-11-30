@@ -1,5 +1,7 @@
 package uk.ac.ed.inf.powergrab;
 
+import java.util.HashMap;
+
 public class Drone {
 
 	public double coins = 0.0;
@@ -41,6 +43,8 @@ public class Drone {
 			}
 		}
 	}
+	
+	
 
 	// Print Drone details (for Debugging)
 	public void printDroneDetails() {

@@ -12,11 +12,12 @@ class StatelessDrone extends Drone {
 	}
 
 	// Get the best direction
-	public Direction getBestDirection(Position curPos) {
+	private Direction getBestDirection(Position curPos) {
 		Direction bestDirection = Position.getRandomDirection(Direction.values());
+		Position nextPos = curPos.nextPosition(bestDirection);
 
 		HashMap<Direction, Double> directionStation = new HashMap<Direction, Double>();
-		Position nextPos = curPos.nextPosition(bestDirection);
+		
 
 		for (Direction direction : Direction.values()) {
 			nextPos = curPos.nextPosition(direction);
@@ -45,8 +46,12 @@ class StatelessDrone extends Drone {
 				bestDirection = direction;
 			}
 		}
-
+		
 		nextPos = curPos.nextPosition(bestDirection);
+		
+//		Direction bestDirection = curPos.getHighestUtilityDirection();
+//		Position nextPos = curPos.nextPosition(bestDirection);
+
 		int dirIndex = bestDirection.ordinal();
 		// If there are all red stations or exceed boundary, move clockwise until safe
 		while (!nextPos.noRedStations() || !nextPos.inPlayArea()) {
@@ -104,7 +109,7 @@ class StatelessDrone extends Drone {
 
 		}
 
-		App.writeToFile(filename, result);
+		Output.writeToFile(filename, result);
 
 		return flightPath;
 	}

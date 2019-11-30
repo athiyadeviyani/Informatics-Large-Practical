@@ -12,7 +12,7 @@ import org.json.JSONException;
 
 public class JsonParser {
 	
-	public static String readAll(Reader rd) throws IOException {
+	private static String readAll(Reader rd) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		int cp;
 		while ((cp = rd.read()) != -1) {

@@ -14,11 +14,10 @@ class StatefulDrone extends Drone {
 		super(startPos);
 	}
 
-	// =============================== POSITIVE STATIONS
-	// ===============================
+	// ===== POSITIVE STATIONS
 
 	// Retrieve a list of Positive Stations
-	public List<Station> getPositiveStations() {
+	private List<Station> getPositiveStations() {
 		List<Station> positiveStations = new ArrayList<Station>();
 		for (Station station : App.stations) {
 			if (station.coins > 0.0 && station.power > 0.0) {
@@ -29,7 +28,7 @@ class StatefulDrone extends Drone {
 	}
 
 	// Gets the closest positive station from a list of positive stations
-	public Station getClosestPositiveStation(Position curPos, List<Station> positiveStations) {
+	private Station getClosestPositiveStation(Position curPos, List<Station> positiveStations) {
 		// Initialise with the first station on the list
 		Station closestPositiveStation = positiveStations.get(0);
 
@@ -43,7 +42,7 @@ class StatefulDrone extends Drone {
 		return closestPositiveStation;
 	}
 
-	public Double getMaxCoins(List<Station> stations) {
+	private Double getMaxCoins(List<Station> stations) {
 		double maxCoins = 0.0;
 		for (Station station : stations) {
 			maxCoins += station.coins;
@@ -51,9 +50,10 @@ class StatefulDrone extends Drone {
 		return maxCoins;
 	}
 
-	// =============================== GET DIRECTION ===============================
+	// ===== DIRECTIONS
+	
 	// Sort Directions
-	public void sortedDirections(List<Direction> directions, final Station cPS) {
+	private void sortedDirections(List<Direction> directions, final Station cPS) {
 		Collections.sort(directions, new Comparator<Direction>() {
 			public int compare(Direction d1, Direction d2) {
 				return Double.compare(startPos.nextPosition(d1).distanceFromDrone(cPS.position),
@@ -64,40 +64,20 @@ class StatefulDrone extends Drone {
 	
 	
 	
-	public Direction getBestRandomDirection(Position pos) {
-		HashMap<Direction, Double> directionCoins = new HashMap<Direction, Double>();
-		for (Direction direction : Direction.values()) {
-			Position nextPos = pos.nextPosition(direction);
-			Station closestStation = nextPos.getClosestStation();
-			if (nextPos.inRange(closestStation) && nextPos.inPlayArea()) {
-				directionCoins.put(direction, closestStation.coins);
-			}	
-		}
+	private Direction getBestRandomDirection(Position pos) {
+		Direction bestRandomDirection = pos.getHighestUtilityDirection();
 		
-		Direction bestRandomDirection = Position.getRandomDirection(Direction.values());
 		Position nextPos = pos.nextPosition(bestRandomDirection);
-		
-		
 		Station closestStation = nextPos.getClosestStation();
-		
-		for (Direction direction : directionCoins.keySet()) {
-			if (directionCoins.get(direction) > closestStation.coins) {
-				bestRandomDirection = direction;
-				nextPos = pos.nextPosition(bestRandomDirection);
-				closestStation = nextPos.getClosestStation();
-			}
-		}
-		
-		// change or no red stations in case bad spawn
+
 		List<Direction> values = new ArrayList<Direction>(Arrays.asList(Direction.values()));
-		//int i = 0;
 		
 		for (int i = 0; i < values.size(); i++) {
 			if (nextPos.inPlayArea() && nextPos.noRedStations()) {
 				break;
 			}
 			// 'Run away' from the closestStation as it leads to the boundary
-			// or to a red station
+			// or to a red station, i.e. pick the direction that brings you the furthest from it
 			sortedDirections(values, closestStation);
 			bestRandomDirection = values.get(values.size() - i - 1);
 			nextPos = pos.nextPosition(bestRandomDirection);
@@ -107,23 +87,21 @@ class StatefulDrone extends Drone {
 		
 	}
 
-	public Direction getBestDirection(List<Position> flightPath, Station closestPositiveStation) {
+	private Direction getBestDirection(List<Position> flightPath, Station closestPositiveStation) {
 
-		List<Direction> values = new ArrayList<Direction>(Arrays.asList(Direction.values()));
-
-		
-		
 		List<Direction> goodDirections = new ArrayList<Direction>();
 		
-		for (Direction direction : values) {
+		for (Direction direction : Direction.values()) {
 			Position nextPos = startPos.nextPosition(direction);
 			if (nextPos.noRedStations() && nextPos.inPlayArea()) {
 				goodDirections.add(direction);
 			}
 		}
 		
+		
+		// If spawn in a bad region, prevent getting stuck
 		if (goodDirections.isEmpty()) {
-			return getBestRandomDirection(startPos);
+			return startPos.getHighestUtilityDirection();
 		}
 		
 		sortedDirections(goodDirections, closestPositiveStation);
@@ -151,7 +129,7 @@ class StatefulDrone extends Drone {
 		return bestDirection;
 	}
 	
-	public Station changeStations(Station currentStation, List<Station> positiveStations) {
+	private Station changeStations(Station currentStation, List<Station> positiveStations) {
 		positiveStations.remove(currentStation);
 		Station nextPositiveStation = positiveStations.get(0);
 		positiveStations.add(currentStation);
@@ -159,7 +137,7 @@ class StatefulDrone extends Drone {
 		return nextPositiveStation;
 	}
 
-	public boolean visited(Position curPos, List<Position> path) {
+	private boolean visited(Position curPos, List<Position> path) {
 
 		int count = 0;
 		for (Position pos : path) {
@@ -172,8 +150,7 @@ class StatefulDrone extends Drone {
 
 	}
 
-	// =============================== MAKE DRONE MOVE
-	// ===============================
+	// ====== MAKE DRONE MOVE
 
 	public List<Position> playStateful(String filename) throws IOException {
 
@@ -211,11 +188,16 @@ class StatefulDrone extends Drone {
 
 				closestPositiveStation = changeStations(closestPositiveStation, positiveStations);
 				bestDirection = getBestDirection(flightPath, closestPositiveStation);
+				
+				// if the new positive station's direction is also visited, then just get
+				// the best random direction
 				if (bestDirection == null) {
 					bestDirection = getBestRandomDirection(startPos);
 				}
 
 			} else if (bestDirection == null && positiveStations.size() <= 1) {
+				// if there are no positive stations left, just go to the best random
+				// direction, i.e. within play area and not towards a red station
 				bestDirection = getBestRandomDirection(startPos);
 			}
 			
@@ -260,7 +242,7 @@ class StatefulDrone extends Drone {
 
 		}
 
-		App.writeToFile(filename, result);
+		Output.writeToFile(filename, result);
 
 		System.out.println("MAX COINS IN THIS MAP IS " + maxCoins);
 
