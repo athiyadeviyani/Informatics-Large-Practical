@@ -1,5 +1,7 @@
 package uk.ac.ed.inf.powergrab;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +19,42 @@ public class App {
 	// List of stations within a map
 	public static List<Station> stations = new ArrayList<Station>();
 
-	// Result string to be written to the output .txt file
-	public static String result = "";
+	/**
+	 * Writes the input string parameter to the specified input file.
+	 * 
+	 * @param fileName - file to be written to
+	 * @param str      - String object to be written to the file
+	 * @throws IOException
+	 */
+	private static void writeToFile(String fileName, String str) throws IOException {
+		BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
+		writer.write(str);
+
+		writer.close();
+	}
+
+	/**
+	 * Outputs a list of positions (flight path of the drone) as a FeatureCollection
+	 * object
+	 * 
+	 * @param path              - list of positions (flight path of the drone)
+	 * @param featurecollection - FeatureCollection object to be added with the list
+	 *                          of positions
+	 * @return FeatureColletion object
+	 */
+	private static FeatureCollection displayPath(List<Position> path, FeatureCollection featurecollection) {
+
+		List<Point> points = new ArrayList<Point>();
+		for (Position position : path) {
+			points.add(Point.fromLngLat(position.longitude, position.latitude));
+		}
+		LineString myLineString = LineString.fromLngLats(points);
+		Feature myFeature = Feature.fromGeometry(myLineString);
+		List<Feature> myFeatures = featurecollection.features();
+		myFeatures.add(myFeature);
+		FeatureCollection finalPath = FeatureCollection.fromFeatures(myFeatures);
+		return finalPath;
+	}
 
 	/**
 	 * Main function that reads input arguments, calls the methods to move the
@@ -57,7 +93,7 @@ public class App {
 		String fileNameGeoJson = state + "-" + day + "-" + month + "-" + year + ".geojson";
 		String fileNameTxt = state + "-" + day + "-" + month + "-" + year + ".txt";
 
-		// Retrieve a list of all the stations within the map 
+		// Retrieve a list of all the stations within the map
 		FeatureCollection collection = FeatureCollection.fromJson(mapJSON);
 		List<Feature> features = collection.features();
 
@@ -77,24 +113,26 @@ public class App {
 		if (state.equals("stateless")) {
 
 			StatelessDrone stateless = new StatelessDrone(startPos);
-			List<Position> flightPath = stateless.playStateless();
-			
-			// Output the final flight path and details of each move 
-			FeatureCollection finalFeatureCollection = Output.displayPath(flightPath, collection);
+			stateless.playStateless();
+			List<Position> flightPath = stateless.flightPath;
+
+			// Output the final flight path and details of each move
+			FeatureCollection finalFeatureCollection = displayPath(flightPath, collection);
 			System.out.println(finalFeatureCollection.toJson());
-			Output.writeToFile(fileNameGeoJson, finalFeatureCollection.toJson());
-			Output.writeToFile(fileNameTxt, result);
+			writeToFile(fileNameGeoJson, finalFeatureCollection.toJson());
+			writeToFile(fileNameTxt, stateless.txtString);
 
 		} else if (state.equals("stateful")) {
 
 			StatefulDrone stateful = new StatefulDrone(startPos);
-			List<Position> flightPath = stateful.playStateful();
-			
-			// Output the final flight path and details of each move 
-			FeatureCollection finalFeatureCollection = Output.displayPath(flightPath, collection);
+			stateful.playStateful();
+			List<Position> flightPath = stateful.flightPath;
+
+			// Output the final flight path and details of each move
+			FeatureCollection finalFeatureCollection = displayPath(flightPath, collection);
 			System.out.println(finalFeatureCollection.toJson());
-			Output.writeToFile(fileNameGeoJson, finalFeatureCollection.toJson());
-			Output.writeToFile(fileNameTxt, result);
+			writeToFile(fileNameGeoJson, finalFeatureCollection.toJson());
+			writeToFile(fileNameTxt, stateful.txtString);
 		}
 
 	}

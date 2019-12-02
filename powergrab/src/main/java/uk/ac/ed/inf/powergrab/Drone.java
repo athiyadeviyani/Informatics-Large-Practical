@@ -1,11 +1,20 @@
 package uk.ac.ed.inf.powergrab;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Drone {
 
 	public double coins = 0.0;
 	public double power = 250.0;
 	public int moves = 0;
 	public Position startPos;
+
+	// Result string to be written to the output .txt file
+	public String txtString = "";
+
+	// Final flight path of the drone
+	public List<Position> flightPath = new ArrayList<Position>();
 
 	public Drone(Position startPos) {
 		this.startPos = startPos;

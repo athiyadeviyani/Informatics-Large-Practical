@@ -116,13 +116,12 @@ class StatefulDrone extends Drone {
 	 * Checks whether a position has been visited more than once
 	 * 
 	 * @param curPos - current position of the drone
-	 * @param path   - current flight path of the drone
 	 * @return
 	 */
-	private boolean visited(Position curPos, List<Position> path) {
+	private boolean visited(Position curPos) {
 
 		int count = 0;
-		for (Position pos : path) {
+		for (Position pos : flightPath) {
 			if (curPos.latitude == pos.latitude && curPos.longitude == pos.longitude) {
 
 				count += 1;
@@ -137,11 +136,10 @@ class StatefulDrone extends Drone {
 	 * drone towards the closest positive station and does not bring the drone away
 	 * from the play area or towards a station with negative charge
 	 * 
-	 * @param flightPath             - current flight path of the drone
 	 * @param closestPositiveStation - closest positive station
 	 * @return best direction
 	 */
-	private Direction getBestDirection(List<Position> flightPath, Station closestPositiveStation) {
+	private Direction getBestDirection(Station closestPositiveStation) {
 
 		// Get a list of directions that does not lead the drone outside the play area
 		// or towards a negative station
@@ -171,7 +169,7 @@ class StatefulDrone extends Drone {
 		// If the drone is repeating itself (visiting the same position more than once,
 		// return null and this will be handled in the playStateful() method)
 		// This prevents the drone from being stuck in the same position
-		if (visited(nextPos, flightPath)) {
+		if (visited(nextPos)) {
 			return null;
 		}
 
@@ -194,14 +192,9 @@ class StatefulDrone extends Drone {
 	}
 
 	/**
-	 * Moves the Stateful drone and generates the drone's flight path
-	 * 
-	 * @return the drone's final flight path (a list of visited positions)
+	 * Moves the Stateful drone and update the drone's flight path
 	 */
-	public List<Position> playStateful() {
-
-		// Initialise the flight path for the drone
-		List<Position> flightPath = new ArrayList<Position>();
+	public void playStateful() {
 
 		// Add the starting position to the flight path
 		flightPath.add(startPos);
@@ -232,13 +225,13 @@ class StatefulDrone extends Drone {
 				}
 
 				// Get the best direction
-				Direction bestDirection = getBestDirection(flightPath, closestPositiveStation);
+				Direction bestDirection = getBestDirection(closestPositiveStation);
 
 				// If the proposed direction leads to a loop, move to the next positive station
 				if (bestDirection == null && positiveStations.size() > 1) {
 
 					closestPositiveStation = changeStations(closestPositiveStation, positiveStations);
-					bestDirection = getBestDirection(flightPath, closestPositiveStation);
+					bestDirection = getBestDirection(closestPositiveStation);
 
 					// if the new positive station's direction is also visited, then just get
 					// the best random direction
@@ -256,15 +249,15 @@ class StatefulDrone extends Drone {
 				loopDir = bestDirection;
 				Position nextPos = startPos.nextPosition(bestDirection);
 
-				App.result += startPos.latitude + ",";
-				App.result += startPos.longitude + ",";
-				App.result += bestDirection + ",";
+				txtString += startPos.latitude + ",";
+				txtString += startPos.longitude + ",";
+				txtString += bestDirection + ",";
 
 				// Move the drone to the best direction
 				move(nextPos);
 
-				App.result += startPos.latitude + ",";
-				App.result += startPos.longitude + ",";
+				txtString += startPos.latitude + ",";
+				txtString += startPos.longitude + ",";
 
 				// Add position to the flight path
 				flightPath.add(startPos);
@@ -284,14 +277,14 @@ class StatefulDrone extends Drone {
 					}
 
 					reached = true;
-					App.result += coins + ",";
-					App.result += power + "\n";
+					txtString += coins + ",";
+					txtString += power + "\n";
 					printDroneDetails();
 				} else {
 					// Continue moving towards the positive station
 					reached = false;
-					App.result += coins + ",";
-					App.result += power + "\n";
+					txtString += coins + ",";
+					txtString += power + "\n";
 					printDroneDetails();
 				}
 
@@ -308,19 +301,19 @@ class StatefulDrone extends Drone {
 					nextPos = startPos.nextPosition(loopDir);
 				}
 
-				App.result += startPos.latitude + ",";
-				App.result += startPos.longitude + ",";
-				App.result += loopDir + ",";
+				txtString += startPos.latitude + ",";
+				txtString += startPos.longitude + ",";
+				txtString += loopDir + ",";
 
 				// Move the drone to the proposed direction
 				move(nextPos);
 
-				App.result += startPos.latitude + ",";
-				App.result += startPos.longitude + ",";
+				txtString += startPos.latitude + ",";
+				txtString += startPos.longitude + ",";
 
 				// Add the current position to the flight path
 				flightPath.add(startPos);
-				
+
 				// Charge from the closest station
 				Station closestStation = startPos.getClosestStation();
 
@@ -330,12 +323,12 @@ class StatefulDrone extends Drone {
 					System.out.println("COINS IN STATION: " + closestStation.getCoins());
 
 					charge(closestStation);
-					App.result += coins + ",";
-					App.result += power + "\n";
+					txtString += coins + ",";
+					txtString += power + "\n";
 					printDroneDetails();
 				} else {
-					App.result += coins + ",";
-					App.result += power + "\n";
+					txtString += coins + ",";
+					txtString += power + "\n";
 					printDroneDetails();
 				}
 			}
@@ -343,8 +336,6 @@ class StatefulDrone extends Drone {
 
 		System.out.println("MAX COINS IN THIS MAP IS " + maxCoins);
 
-		// Return the final flight path
-		return flightPath;
 	}
 
 }

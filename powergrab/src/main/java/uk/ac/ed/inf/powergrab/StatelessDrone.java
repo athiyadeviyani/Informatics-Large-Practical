@@ -1,8 +1,5 @@
 package uk.ac.ed.inf.powergrab;
 
-import java.util.ArrayList;
-import java.util.List;
-
 class StatelessDrone extends Drone {
 
 	public StatelessDrone(Position startPos) {
@@ -38,14 +35,9 @@ class StatelessDrone extends Drone {
 	}
 
 	/**
-	 * Moves the Stateless drone and generates the drone's flight path
-	 * 
-	 * @return the drone's final flight path (a list of visited positions)
+	 * Moves the Stateless drone and update the drone's flight path
 	 */
-	public List<Position> playStateless() {
-
-		// Initialise the flightPath
-		List<Position> flightPath = new ArrayList<Position>();
+	public void playStateless() {
 
 		// Add the starting position to the flightPath
 		flightPath.add(startPos);
@@ -58,15 +50,15 @@ class StatelessDrone extends Drone {
 			Direction bestDirection = getBestDirection(startPos);
 			Position nextPos = startPos.nextPosition(bestDirection);
 
-			App.result += startPos.latitude + ",";
-			App.result += startPos.longitude + ",";
-			App.result += bestDirection + ",";
+			txtString += startPos.latitude + ",";
+			txtString += startPos.longitude + ",";
+			txtString += bestDirection + ",";
 
 			// Move the drone towards the best direction
 			move(nextPos);
 
-			App.result += startPos.latitude + ",";
-			App.result += startPos.longitude + ",";
+			txtString += startPos.latitude + ",";
+			txtString += startPos.longitude + ",";
 
 			// Add the current position to the flight path
 			flightPath.add(startPos);
@@ -77,19 +69,18 @@ class StatelessDrone extends Drone {
 			// Charge from the closest station if it is within charging range
 			if (startPos.inRange(closestStation)) {
 				charge(closestStation);
-				App.result += coins + ",";
-				App.result += power + "\n";
+				txtString += coins + ",";
+				txtString += power + "\n";
 				printDroneDetails();
 			} else {
 				// Continue moving
-				App.result += coins + ",";
-				App.result += power + "\n";
+				txtString += coins + ",";
+				txtString += power + "\n";
 				printDroneDetails();
 			}
 
 		}
 
-		return flightPath;
 	}
 
 }
