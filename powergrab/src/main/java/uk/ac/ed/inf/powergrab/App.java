@@ -1,11 +1,7 @@
 package uk.ac.ed.inf.powergrab;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-//import java.net.URL;
-//import com.mapbox.geojson.*;
 import java.util.List;
 import java.util.Random;
 
@@ -13,19 +9,29 @@ import org.json.JSONException;
 
 import com.mapbox.geojson.*;
 
-/**
- * Hello world!
- *
- */
-public class App 
-{
+public class App {
+
+	// Random seed
 	public static java.util.Random rnd;
+
+	// List of stations within a map
 	public static List<Station> stations = new ArrayList<Station>();
 
+	// Result string to be written to the output .txt file
+	public static String result = "";
 
-	public static void main( String[] args ) throws JSONException, IOException
-	{
-		// Read out the input arguments
+	/**
+	 * Main function that reads input arguments, calls the methods to move the
+	 * Stateless and Stateful drones with respect to the input, and generates the
+	 * output .geojson and .txt files
+	 * 
+	 * @param args
+	 * @throws JSONException
+	 * @throws IOException
+	 */
+	public static void main(String[] args) throws JSONException, IOException {
+
+		// Read the input arguments
 		String day = args[0];
 		String month = args[1];
 		String year = args[2];
@@ -35,21 +41,23 @@ public class App
 
 		int seed = Integer.parseInt(args[5]);
 
-		rnd = new Random(seed);
-
-
-
-		System.out.println("THIS IS THE RANDOM SEED: " + rnd);
-
 		String state = args[6];
 
-		String mapString = "http://homepages.inf.ed.ac.uk/stg/powergrab/" + year + "/" + month + "/" + day + "/powergrabmap.geojson";
+		// Generate the random seed
+		rnd = new Random(seed);
 
+		// Generate the map GeoJSON URL
+		String mapString = "http://homepages.inf.ed.ac.uk/stg/powergrab/" + year + "/" + month + "/" + day
+				+ "/powergrabmap.geojson";
+
+		// Generate the map GeoJSON
 		String mapJSON = JsonParser.readJsonFromUrl(mapString);
 
+		// Create the output filenames
 		String fileNameGeoJson = state + "-" + day + "-" + month + "-" + year + ".geojson";
 		String fileNameTxt = state + "-" + day + "-" + month + "-" + year + ".txt";
 
+		// Retrieve a list of all the stations within the map 
 		FeatureCollection collection = FeatureCollection.fromJson(mapJSON);
 		List<Feature> features = collection.features();
 
@@ -62,27 +70,32 @@ public class App
 			stations.add(station);
 		}
 
-
-
+		// Creates the starting position object based on the input arguments
 		Position startPos = new Position(latitude, longitude);
 
+		// Start the drones
 		if (state.equals("stateless")) {
-			System.out.println("I am a stateless drone. Beep beep.");
+
 			StatelessDrone stateless = new StatelessDrone(startPos);
-			List<Position> flightPath = stateless.playStateless(fileNameTxt);
+			List<Position> flightPath = stateless.playStateless();
+			
+			// Output the final flight path and details of each move 
 			FeatureCollection finalFeatureCollection = Output.displayPath(flightPath, collection);
 			System.out.println(finalFeatureCollection.toJson());
 			Output.writeToFile(fileNameGeoJson, finalFeatureCollection.toJson());
+			Output.writeToFile(fileNameTxt, result);
 
 		} else if (state.equals("stateful")) {
-			System.out.println("I am a stateful drone. Beep beep.");
+
 			StatefulDrone stateful = new StatefulDrone(startPos);
-			List<Position> flightPath = stateful.playStateful(fileNameTxt);
+			List<Position> flightPath = stateful.playStateful();
+			
+			// Output the final flight path and details of each move 
 			FeatureCollection finalFeatureCollection = Output.displayPath(flightPath, collection);
 			System.out.println(finalFeatureCollection.toJson());
 			Output.writeToFile(fileNameGeoJson, finalFeatureCollection.toJson());
+			Output.writeToFile(fileNameTxt, result);
 		}
-
 
 	}
 }

@@ -1,8 +1,6 @@
 package uk.ac.ed.inf.powergrab;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 class StatelessDrone extends Drone {
@@ -11,105 +9,85 @@ class StatelessDrone extends Drone {
 		super(startPos);
 	}
 
-	// Get the best direction
+	/**
+	 * Gets the best direction for the drone that does not lead to a play area
+	 * boundary or a negatively charged station. If the proposed direction leads the
+	 * drone to a play area boundary or a negatively charged station, then avoid
+	 * that position by turning in a clockwise direction until the drone is in a
+	 * safe position.
+	 * 
+	 * @param curPos - current position of the drone
+	 * @return
+	 */
 	private Direction getBestDirection(Position curPos) {
-		Direction bestDirection = Position.getRandomDirection(Direction.values());
+
+		Direction bestDirection = curPos.getHighestUtilityDirection();
+
 		Position nextPos = curPos.nextPosition(bestDirection);
 
-		HashMap<Direction, Double> directionStation = new HashMap<Direction, Double>();
-		
-
-		for (Direction direction : Direction.values()) {
-			nextPos = curPos.nextPosition(direction);
-			if (nextPos.inPlayArea()) {
-				for (Station station : App.stations) {
-					// Look for all the stations that are within 0.00025 from nextPos
-					if (nextPos.distanceFromDrone(station.position) <= 0.00025 && station.position.inPlayArea()
-							&& station.coins != 0.0 && station.power != 0.0) {
-
-						if (directionStation.get(direction) != null) {
-							Double current = directionStation.get(direction);
-							directionStation.put(direction, current + station.coins);
-						}
-						directionStation.put(direction, station.coins);
-
-					}
-				}
-			}
-		}
-
-		double maxCoins = 0.0;
-
-		for (Direction direction : directionStation.keySet()) {
-			if (directionStation.get(direction) > maxCoins) {
-				maxCoins = directionStation.get(direction);
-				bestDirection = direction;
-			}
-		}
-		
-		nextPos = curPos.nextPosition(bestDirection);
-		
-//		Direction bestDirection = curPos.getHighestUtilityDirection();
-//		Position nextPos = curPos.nextPosition(bestDirection);
-
 		int dirIndex = bestDirection.ordinal();
-		// If there are all red stations or exceed boundary, move clockwise until safe
+		// If the next position leads to a negatively charged station or a play area
+		// boundary, move in a clockwise direction until safe
 		while (!nextPos.noRedStations() || !nextPos.inPlayArea()) {
 			dirIndex += 1;
 			bestDirection = Direction.values()[(dirIndex) % 16];
-//			bestDirection = Position.getRandomDirection(Direction.values());
 			nextPos = curPos.nextPosition(bestDirection);
 		}
 
 		return bestDirection;
 	}
 
-	// Make drone move
-	public List<Position> playStateless(String filename) throws IOException {
+	/**
+	 * Moves the Stateless drone and generates the drone's flight path
+	 * 
+	 * @return the drone's final flight path (a list of visited positions)
+	 */
+	public List<Position> playStateless() {
 
 		// Initialise the flightPath
 		List<Position> flightPath = new ArrayList<Position>();
-		String result = "";
 
 		// Add the starting position to the flightPath
 		flightPath.add(startPos);
 
+		// Move the drone as long as it has sufficient power and has not exceeded the
+		// allowed number of moves
 		while (hasPower() && hasMoves()) {
 
 			// Find the best direction and move there
 			Direction bestDirection = getBestDirection(startPos);
 			Position nextPos = startPos.nextPosition(bestDirection);
 
-			result += startPos.latitude + ",";
-			result += startPos.longitude + ",";
-			result += bestDirection + ",";
+			App.result += startPos.latitude + ",";
+			App.result += startPos.longitude + ",";
+			App.result += bestDirection + ",";
 
-			// Move
+			// Move the drone towards the best direction
 			move(nextPos);
 
-			result += startPos.latitude + ",";
-			result += startPos.longitude + ",";
+			App.result += startPos.latitude + ",";
+			App.result += startPos.longitude + ",";
 
-			// Add the flight path
+			// Add the current position to the flight path
 			flightPath.add(startPos);
 
 			// Get the closest station
 			Station closestStation = startPos.getClosestStation();
 
+			// Charge from the closest station if it is within charging range
 			if (startPos.inRange(closestStation)) {
-				collect(closestStation);
-				result += coins + ",";
-				result += power + "\n";
+				charge(closestStation);
+				App.result += coins + ",";
+				App.result += power + "\n";
 				printDroneDetails();
 			} else {
-				result += coins + ",";
-				result += power + "\n";
+				// Continue moving
+				App.result += coins + ",";
+				App.result += power + "\n";
 				printDroneDetails();
 			}
 
 		}
-
-		Output.writeToFile(filename, result);
 
 		return flightPath;
 	}

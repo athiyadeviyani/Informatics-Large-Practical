@@ -10,8 +10,16 @@ import java.nio.charset.Charset;
 
 import org.json.JSONException;
 
+// REFERENCE: https://community.apigee.com/questions/52082/how-to-retrive-the-json-data-using-java.html
 public class JsonParser {
-	
+
+	/**
+	 * Returns an object read by a Reader object as a StringBuilder object
+	 * 
+	 * @param rd - BufferedReader object
+	 * @return StringBuilder object
+	 * @throws IOException
+	 */
 	private static String readAll(Reader rd) throws IOException {
 		StringBuilder sb = new StringBuilder();
 		int cp;
@@ -20,7 +28,15 @@ public class JsonParser {
 		}
 		return sb.toString();
 	}
-	
+
+	/**
+	 * Reads JSON data from a given URL
+	 * 
+	 * @param url - uniform resource locator of the JSON data
+	 * @return JSON data as a String object
+	 * @throws IOException
+	 * @throws JSONException
+	 */
 	public static String readJsonFromUrl(String url) throws IOException, JSONException {
 		InputStream is = new URL(url).openStream();
 		try {
@@ -33,6 +49,5 @@ public class JsonParser {
 			is.close();
 		}
 	}
-	
 
 }

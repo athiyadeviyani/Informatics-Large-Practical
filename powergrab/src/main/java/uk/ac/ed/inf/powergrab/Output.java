@@ -12,17 +12,30 @@ import com.mapbox.geojson.LineString;
 import com.mapbox.geojson.Point;
 
 public class Output {
-	
-	public static void writeToFile(String fileName, String str) 
-			throws IOException {
+
+	/**
+	 * Writes the input string parameter to the specified input file.
+	 * 
+	 * @param fileName - file to be written to
+	 * @param str      - String object to be written to the file
+	 * @throws IOException
+	 */
+	public static void writeToFile(String fileName, String str) throws IOException {
 		BufferedWriter writer = new BufferedWriter(new FileWriter(fileName));
 		writer.write(str);
 
 		writer.close();
 	}
 
-	
-	// Outputs a list of positions (flight path of the drone) as a FeatureCollection object
+	/**
+	 * Outputs a list of positions (flight path of the drone) as a FeatureCollection
+	 * object
+	 * 
+	 * @param path              - list of positions (flight path of the drone)
+	 * @param featurecollection - FeatureCollection object to be added with the list
+	 *                          of positions
+	 * @return FeatureColletion object
+	 */
 	public static FeatureCollection displayPath(List<Position> path, FeatureCollection featurecollection) {
 
 		List<Point> points = new ArrayList<Point>();
