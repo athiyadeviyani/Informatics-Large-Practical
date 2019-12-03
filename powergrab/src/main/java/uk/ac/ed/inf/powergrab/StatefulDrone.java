@@ -41,8 +41,8 @@ class StatefulDrone extends Drone {
 		Station closestPositiveStation = positiveStations.get(0);
 
 		for (Station station : positiveStations) {
-			if (curPos.distanceFromDrone(station.position) < curPos
-					.distanceFromDrone(closestPositiveStation.position)) {
+			if (curPos.distanceFromDrone(station.getPosition()) < curPos
+					.distanceFromDrone(closestPositiveStation.getPosition())) {
 				closestPositiveStation = station;
 			}
 		}
@@ -74,8 +74,8 @@ class StatefulDrone extends Drone {
 	private void sortedDirections(List<Direction> directions, final Station cPS) {
 		Collections.sort(directions, new Comparator<Direction>() {
 			public int compare(Direction d1, Direction d2) {
-				return Double.compare(startPos.nextPosition(d1).distanceFromDrone(cPS.position),
-						startPos.nextPosition(d2).distanceFromDrone(cPS.position));
+				return Double.compare(startPos.nextPosition(d1).distanceFromDrone(cPS.getPosition()),
+						startPos.nextPosition(d2).distanceFromDrone(cPS.getPosition()));
 			}
 		});
 	}

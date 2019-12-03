@@ -5,10 +5,10 @@ import java.util.List;
 
 public class Drone {
 
-	public double coins = 0.0;
-	public double power = 250.0;
-	public int moves = 0;
-	public Position startPos;
+	protected double coins = 0.0;
+	protected double power = 250.0;
+	protected int moves = 0;
+	protected Position startPos;
 
 	// Result string to be written to the output .txt file
 	public String txtString = "";
@@ -25,7 +25,7 @@ public class Drone {
 	 * 
 	 * @return true if the drone still has power, false otherwise
 	 */
-	public boolean hasPower() {
+	protected boolean hasPower() {
 		return power >= 1.25;
 	}
 
@@ -34,7 +34,7 @@ public class Drone {
 	 * 
 	 * @return true if the drone has not exceeded 250 moves, false otherwise
 	 */
-	public boolean hasMoves() {
+	protected boolean hasMoves() {
 		return moves < 250;
 	}
 
@@ -44,7 +44,7 @@ public class Drone {
 	 * 
 	 * @param nextPos - the position that the drone will move to
 	 */
-	public void move(Position nextPos) {
+	protected void move(Position nextPos) {
 		startPos = nextPos;
 		moves += 1;
 		power -= 1.25;
@@ -56,7 +56,7 @@ public class Drone {
 	 * 
 	 * @param closestStation
 	 */
-	public void charge(Station closestStation) {
+	protected void charge(Station closestStation) {
 		coins += closestStation.getCoins();
 		power += Math.max(closestStation.getCoins(), -power);
 
@@ -72,7 +72,7 @@ public class Drone {
 	/**
 	 * Print the drone's power, coins, and number of moves for debugging purposes
 	 */
-	public void printDroneDetails() {
+	protected void printDroneDetails() {
 		System.out.println("--------------------------------------------------------------------------------");
 		System.out.println("DRONE DEETS");
 		System.out.println("POWER: " + power);

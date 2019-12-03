@@ -3,8 +3,10 @@ package uk.ac.ed.inf.powergrab;
 import java.util.HashMap;
 
 public class Position {
-	public double latitude;
-	public double longitude;
+	
+	// Position attributes are public final because they should be immutable
+	public final double latitude;
+	public final double longitude;
 
 	public Position(double latitude, double longitude) {
 		this.latitude = latitude;
@@ -69,7 +71,7 @@ public class Position {
 		Position curPos = new Position(this.latitude, this.longitude);
 		Station closestStation = App.stations.get(0);
 		for (Station station : App.stations) {
-			if (curPos.distanceFromDrone(station.position) < curPos.distanceFromDrone(closestStation.position)) {
+			if (curPos.distanceFromDrone(station.getPosition()) < curPos.distanceFromDrone(closestStation.getPosition())) {
 				closestStation = station;
 			}
 		}
@@ -86,7 +88,7 @@ public class Position {
 	 */
 	public boolean inRange(Station station) {
 		Position pos = new Position(this.latitude, this.longitude);
-		if (pos.distanceFromDrone(station.position) <= 0.00025) {
+		if (pos.distanceFromDrone(station.getPosition()) <= 0.00025) {
 			return true;
 		}
 		return false;

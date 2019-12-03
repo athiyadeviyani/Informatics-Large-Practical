@@ -4,7 +4,7 @@ public class Station {
 
 	private double coins;
 	private double power;
-	public Position position;
+	private final Position position;
 
 	public Station(double coins, double power, Position position) {
 		this.coins = coins;
@@ -46,6 +46,14 @@ public class Station {
 	 */
 	public void setPower(Double power) {
 		this.power = power;
+	}
+	
+	/**
+	 * Gets the position of the station
+	 * @return position of the station
+	 */
+	public Position getPosition() {
+		return this.position;
 	}
 
 }
