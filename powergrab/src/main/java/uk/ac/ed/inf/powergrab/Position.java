@@ -121,7 +121,7 @@ public class Position {
 	 * surrounded by negative stations and game boundaries) and would rather charge
 	 * from any random direction rather than getting stuck.
 	 * 
-	 * @return
+	 * @return direction with the highest utility
 	 */
 	public Direction getHighestUtilityDirection() {
 		Position pos = new Position(this.latitude, this.longitude);

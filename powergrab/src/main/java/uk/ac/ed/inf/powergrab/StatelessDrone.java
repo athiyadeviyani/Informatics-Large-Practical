@@ -14,7 +14,7 @@ class StatelessDrone extends Drone {
 	 * safe position.
 	 * 
 	 * @param curPos - current position of the drone
-	 * @return
+	 * @return best direction for the drone to go to 
 	 */
 	private Direction getBestDirection(Position curPos) {
 

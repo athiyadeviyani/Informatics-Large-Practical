@@ -116,7 +116,7 @@ class StatefulDrone extends Drone {
 	 * Checks whether a position has been visited more than once
 	 * 
 	 * @param curPos - current position of the drone
-	 * @return
+	 * @return true if a position has been visited more than once, false otherwise
 	 */
 	private boolean visited(Position curPos) {
 
