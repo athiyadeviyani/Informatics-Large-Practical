@@ -67,10 +67,30 @@ public class App {
 	 */
 	public static void main(String[] args) throws JSONException, IOException {
 
+		// Check if the input arguments are enough
+		if (args.length != 7) {
+			System.out.println("Incorrect number of input arguments!");
+			System.exit(0);
+		}
+
 		// Read the input arguments
 		String day = args[0];
+		Integer day_int = Integer.parseInt(day);
 		String month = args[1];
+		Integer month_int = Integer.parseInt(month);
 		String year = args[2];
+
+		// Check if the input month is valid
+		if (month_int > 12 || month_int < 1) {
+			System.out.println("Invalid month input!");
+			System.exit(0);
+		}
+		
+		// Check if the input day is valid
+		if (day_int > 31 || day_int < 1) {
+			System.out.println("Invalid day input!");
+			System.exit(0);
+		}
 
 		double latitude = Double.parseDouble(args[3]);
 		double longitude = Double.parseDouble(args[4]);
@@ -108,6 +128,17 @@ public class App {
 
 		// Creates the starting position object based on the input arguments
 		Position startPos = new Position(latitude, longitude);
+
+		// Check if the input position is within the play area
+		if (!startPos.inPlayArea()) {
+			System.out.println("Input longitude and latitude are outside of the play area!");
+			System.exit(0);
+		}
+
+		// Check if the input state is either stateless or stateful only
+		if (!(state.equals("stateless") || state.equals("stateful"))) {
+			System.out.println("Input state should only be 'stateless' or 'stateful'!");
+		}
 
 		// Start the drones
 		if (state.equals("stateless")) {

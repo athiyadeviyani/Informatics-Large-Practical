@@ -25,7 +25,10 @@ class StatelessDrone extends Drone {
 		int dirIndex = bestDirection.ordinal();
 		// If the next position leads to a negatively charged station or a play area
 		// boundary, move in a clockwise direction until safe
-		while (!nextPos.noRedStations() || !nextPos.inPlayArea()) {
+		for (int i = 0; i < 16; i++) {
+			if (nextPos.noRedStations() && nextPos.inPlayArea()) {
+				break;
+			}
 			dirIndex += 1;
 			bestDirection = Direction.values()[(dirIndex) % 16];
 			nextPos = curPos.nextPosition(bestDirection);
