@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuite tests="30" failures="0" name="uk.ac.ed.inf.powergrab.AppTest" time="0.007" errors="0" skipped="0">
+<testsuite tests="30" failures="0" name="uk.ac.ed.inf.powergrab.AppTest" time="0.006" errors="0" skipped="0">
   <properties>
     <property name="java.runtime.name" value="OpenJDK Runtime Environment"/>
     <property name="sun.boot.library.path" value="/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.232.b09-0.el7_7.x86_64/jre/lib/amd64"/>
@@ -25,7 +25,7 @@
 "/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="os.name" value="Linux"/>
-    <property name="classworlds.conf" value="/afs/inf.ed.ac.uk/user/s17/s1709906/ILP/.metadata/.plugins/org.eclipse.m2e.launching/launches/m2conf5246734864710715441.tmp"/>
+    <property name="classworlds.conf" value="/afs/inf.ed.ac.uk/user/s17/s1709906/ILP/.metadata/.plugins/org.eclipse.m2e.launching/launches/m2conf4254526807532513044.tmp"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
     <property name="java.library.path" value="/usr/java/packages/lib/amd64:/usr/lib64:/lib64:/lib:/usr/lib"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
@@ -61,13 +61,20 @@
     <property name="sun.desktop" value="gnome"/>
     <property name="sun.cpu.isalist" value=""/>
   </properties>
-  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testNorthThenSouth" time="0.006"/>
+  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testPositionConstructor" time="0.006"/>
+  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testPositionLatitude" time="0"/>
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testEastThenWest" time="0"/>
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testNorthSouthEastWest" time="0"/>
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testNorthEastThenSouthEastThenSouthWestThenNorthWest" time="0"/>
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testNorthThenEastIsNotNorthEast" time="0"/>
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testNEisNorthEast" time="0"/>
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testNNEisNorthEast" time="0"/>
+  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testPositionOutOfPlayArea" time="0"/>
+  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testNextPositionNotIdentity" time="0"/>
+  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testNorthThenSouth" time="0"/>
+  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testPositionLongitude" time="0"/>
+  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testCentreInPlayArea" time="0"/>
+  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testBoundaryOutOfPlayArea" time="0"/>
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testENEisNorthEast" time="0"/>
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testSWisSouthWest" time="0"/>
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testWSWisSouthWest" time="0"/>
@@ -79,16 +86,9 @@
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testNorthNorthEastThenSouthSouthWest" time="0"/>
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testEastNorthEastThenWestSouthWest" time="0"/>
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testNorthNorthWestThenSouthSouthEast" time="0"/>
-  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testEastSouthEastThenWestNorthWest" time="0.001"/>
+  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testEastSouthEastThenWestNorthWest" time="0"/>
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testSSEthenS" time="0"/>
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testSSEthenSthenSE" time="0"/>
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testSSEthenSthenSEthenNE" time="0"/>
   <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testSSEthenSthenSEthenNEthenWNW" time="0"/>
-  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testPositionConstructor" time="0"/>
-  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testPositionLatitude" time="0"/>
-  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testPositionLongitude" time="0"/>
-  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testCentreInPlayArea" time="0"/>
-  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testBoundaryOutOfPlayArea" time="0"/>
-  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testPositionOutOfPlayArea" time="0"/>
-  <testcase classname="uk.ac.ed.inf.powergrab.AppTest" name="testNextPositionNotIdentity" time="0"/>
 </testsuite>

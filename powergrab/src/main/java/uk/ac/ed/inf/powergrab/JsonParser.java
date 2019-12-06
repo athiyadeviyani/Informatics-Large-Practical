@@ -10,7 +10,7 @@ import java.nio.charset.Charset;
 
 import org.json.JSONException;
 
-// REFERENCE: https://community.apigee.com/questions/52082/how-to-retrive-the-json-data-using-java.html
+
 public class JsonParser {
 
 	/**

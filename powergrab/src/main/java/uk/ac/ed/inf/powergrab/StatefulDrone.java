@@ -51,6 +51,7 @@ class StatefulDrone extends Drone {
 	}
 
 	/**
+	 * Gets the maximum number of coins in the map.
 	 * 
 	 * @param stations - list of stations
 	 * @return maximum number of coins in the map
@@ -115,14 +116,14 @@ class StatefulDrone extends Drone {
 	/**
 	 * Checks whether a position has been visited more than once
 	 * 
-	 * @param curPos - current position of the drone
+	 * @param newPos - current position of the drone
 	 * @return true if a position has been visited more than once, false otherwise
 	 */
-	private boolean visited(Position curPos) {
+	private boolean visited(Position newPos) {
 
 		int count = 0;
 		for (Position pos : flightPath) {
-			if (curPos.latitude == pos.latitude && curPos.longitude == pos.longitude) {
+			if (newPos.latitude == pos.latitude && newPos.longitude == pos.longitude) {
 
 				count += 1;
 			}
@@ -137,7 +138,7 @@ class StatefulDrone extends Drone {
 	 * from the play area or towards a station with negative charge
 	 * 
 	 * @param closestPositiveStation - closest positive station
-	 * @return best direction
+	 * @return the direction that brings the drone closest to the target station
 	 */
 	private Direction getBestDirection(Station closestPositiveStation) {
 
@@ -177,7 +178,8 @@ class StatefulDrone extends Drone {
 	}
 
 	/**
-	 * Move to the next positive station
+	 * Move to the next positive station and add the current station to the back of
+	 * the list, indicating that it will be 'visited later'
 	 * 
 	 * @param currentStation   - current positive station
 	 * @param positiveStations - list of positive stations within the map
