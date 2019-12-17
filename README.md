@@ -8,3 +8,12 @@ Devised an efficient stateless and stateful drone strategy to collect cryptocurr
 <li> <a href="https://github.com/athiyadeviyani/Informatics-Large-Practical/blob/master/report.xlsx">report.xlsx</a> contains the detailed coin collection of the stateful drone across over 700 maps
 <li> <a href="https://github.com/athiyadeviyani/Informatics-Large-Practical/blob/master/report_stateless.xlsx">report_stateless.xlsx</a> contains the detailed coin collection of the stateless drone across over 700 maps
 </ul>
+
+<br>Sample flight path of the stateful drone on 10/10/2019
+<br>
+<img src="https://github.com/athiyadeviyani/Informatics-Large-Practical/blob/master/stateful.png" width=500>
+<br>
+<br>
+<br>Sample flight path of the stateless drone on 10/10/2019
+<br>
+<img src="https://github.com/athiyadeviyani/Informatics-Large-Practical/blob/master/stateless.png" width=500>
